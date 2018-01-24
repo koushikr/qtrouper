@@ -18,10 +18,4 @@ public class SidelineConfiguration {
 
     private int concurrency;
 
-    public static SidelineConfiguration getDefaultConfiguration() {
-        return SidelineConfiguration.builder()
-                .enabled(true)
-                .concurrency(0)
-                .build();
-    }
 }
