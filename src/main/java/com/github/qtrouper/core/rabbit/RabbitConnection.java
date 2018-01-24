@@ -1,4 +1,4 @@
-package com.github.qtrouper.rabbit;
+package com.github.qtrouper.core.rabbit;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;

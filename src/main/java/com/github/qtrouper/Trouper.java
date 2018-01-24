@@ -1,11 +1,11 @@
-package com.github.qtrouper.core;
+package com.github.qtrouper;
 
 import com.github.qtrouper.core.models.QAccessInfo;
 import com.github.qtrouper.core.models.QueueContext;
-import com.github.qtrouper.rabbit.RabbitConnection;
-import com.github.qtrouper.trouper.QueueConfiguration;
-import com.github.qtrouper.trouper.RetryConfiguration;
-import com.github.qtrouper.trouper.SidelineConfiguration;
+import com.github.qtrouper.core.rabbit.RabbitConnection;
+import com.github.qtrouper.core.config.QueueConfiguration;
+import com.github.qtrouper.core.config.RetryConfiguration;
+import com.github.qtrouper.core.config.SidelineConfiguration;
 import com.github.qtrouper.utils.SerDe;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -30,7 +30,7 @@ import java.util.Set;
 @EqualsAndHashCode
 @ToString
 @Slf4j
-public abstract class QTrouper<Message extends QueueContext> {
+public abstract class Trouper<Message extends QueueContext> {
 
     private static final String RETRY_COUNT = "x-retry-count";
     private static final String EXPIRATION = "x-message-ttl";
@@ -44,7 +44,7 @@ public abstract class QTrouper<Message extends QueueContext> {
     private Channel publishChannel;
     private List<Handler> handlers = Lists.newArrayList();
 
-    protected QTrouper(
+    protected Trouper(
             String queueName,
             QueueConfiguration config,
             RabbitConnection connection,
@@ -233,7 +233,7 @@ public abstract class QTrouper<Message extends QueueContext> {
     private class Handler extends DefaultConsumer {
 
         private final Class<? extends Message> clazz;
-        private final QTrouper<Message> trouper;
+        private final Trouper<Message> trouper;
         private final boolean sideline;
 
         @Getter
@@ -243,12 +243,12 @@ public abstract class QTrouper<Message extends QueueContext> {
         private Handler(Channel channel,
                         Class<? extends Message> clazz,
                         int prefetchCount,
-                        QTrouper<Message> qTrouper,
+                        Trouper<Message> trouper,
                         boolean sideline) throws Exception {
             super(channel);
 
             this.clazz = clazz;
-            this.trouper = qTrouper;
+            this.trouper = trouper;
             this.sideline = sideline;
             getChannel().basicQos(prefetchCount);
         }

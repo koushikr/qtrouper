@@ -1,4 +1,4 @@
-package com.github.qtrouper.rabbit;
+package com.github.qtrouper.core.rabbit;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

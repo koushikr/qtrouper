@@ -1,7 +1,7 @@
 package com.github.qtrouper.core.healthchecks;
 
 import com.codahale.metrics.health.HealthCheck;
-import com.github.qtrouper.rabbit.RabbitConnection;
+import com.github.qtrouper.core.rabbit.RabbitConnection;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 

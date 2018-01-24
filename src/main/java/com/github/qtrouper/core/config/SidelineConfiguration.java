@@ -1,4 +1,4 @@
-package com.github.qtrouper.trouper;
+package com.github.qtrouper.core.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;

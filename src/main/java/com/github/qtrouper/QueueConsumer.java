@@ -1,4 +1,4 @@
-package com.github.qtrouper.core;
+package com.github.qtrouper;
 
 import com.github.qtrouper.core.models.QAccessInfo;
 import com.github.qtrouper.core.models.QueueContext;

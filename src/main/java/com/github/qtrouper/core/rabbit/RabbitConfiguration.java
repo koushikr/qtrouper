@@ -1,4 +1,4 @@
-package com.github.qtrouper.rabbit;
+package com.github.qtrouper.core.rabbit;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
