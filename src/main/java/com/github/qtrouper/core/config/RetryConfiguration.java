@@ -23,12 +23,4 @@ public class RetryConfiguration {
 
     private int backOffFactor; //multiplicationFactor
 
-    public static RetryConfiguration getDefaultRetryConfiguration() {
-        return RetryConfiguration.builder()
-                .enabled(true)
-                .ttlMs(1000)
-                .maxRetries(3)
-                .backOffFactor(2)
-                .build();
-    }
 }
