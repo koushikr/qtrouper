@@ -65,9 +65,9 @@ public abstract class Trouper<Message extends QueueContext> {
                 .anyMatch(exceptionType -> ClassUtils.isAssignable(t.getClass(), exceptionType));
     }
 
-    abstract protected boolean process(Message message, QAccessInfo accessInfo);
+    public abstract boolean process(Message message, QAccessInfo accessInfo);
 
-    abstract protected boolean processSideline(Message message, QAccessInfo accessInfo);
+    public abstract boolean processSideline(Message message, QAccessInfo accessInfo);
 
     private boolean handle(Message message, AMQP.BasicProperties properties) throws Exception {
         boolean processed = process(message, getAccessInformation(properties));
