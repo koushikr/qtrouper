@@ -2,7 +2,9 @@ package com.github.qtrouper.trouper;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +19,9 @@ import java.util.Optional;
 @NoArgsConstructor
 @Builder
 public class TrouperConfiguration {
+
+    @NotNull @NotEmpty
+    private String handlerPackage;
 
     private List<QueueConfiguration> queues = new ArrayList<>();
 

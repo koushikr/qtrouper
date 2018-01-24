@@ -18,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
-class RabbitConfiguration {
+public class RabbitConfiguration {
 
     @NotNull
     @NotEmpty

@@ -6,6 +6,7 @@ import com.rabbitmq.client.Address;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import io.dropwizard.lifecycle.Managed;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,7 +21,7 @@ import java.util.concurrent.Executors;
 @Slf4j
 @Singleton
 @Getter
-public class RabbitConnection {
+public class RabbitConnection implements Managed{
 
     private final RabbitConfiguration config;
     private Connection connection;
@@ -32,7 +33,7 @@ public class RabbitConnection {
         this.start();
     }
 
-    private void start() throws Exception {
+    public void start() throws Exception {
         log.info("Starting Rabbit Connection");
 
         ConnectionFactory factory = new ConnectionFactory();
