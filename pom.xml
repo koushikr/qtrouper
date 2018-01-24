@@ -9,6 +9,14 @@
     <properties>
         <!-- github server corresponds to entry in ~/.m2/settings.xml -->
         <github.global.server>github</github.global.server>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <dropwizard.version>1.1.4</dropwizard.version>
+        <lombok.version>1.16.18</lombok.version>
+        <cglib.version>3.2.5</cglib.version>
+        <guava.version>23.0</guava.version>
+        <junit.version>4.12</junit.version>
+        <mockito.version>2.9.0</mockito.version>
+        <amqp.version>3.6.5</amqp.version>
     </properties>
   
     <distributionManagement>
@@ -36,15 +44,7 @@
         </developer>
     </developers>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <dropwizard.version>1.1.4</dropwizard.version>
-        <lombok.version>1.16.18</lombok.version>
-        <cglib.version>3.2.5</cglib.version>
-        <guava.version>23.0</guava.version>
-        <junit.version>4.12</junit.version>
-        <mockito.version>2.9.0</mockito.version>
-    </properties>  
+
 
     <dependencies>
         <dependency>
@@ -82,6 +82,14 @@
             <artifactId>reflections</artifactId>
             <version>0.9.11</version>
         </dependency>
+
+        <!-- RabbitMQ -->
+        <dependency>
+            <groupId>com.rabbitmq</groupId>
+            <artifactId>amqp-client</artifactId>
+            <version>${amqp.version}</version>
+        </dependency>
+
     </dependencies>
 
 
