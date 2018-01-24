@@ -119,9 +119,8 @@ public abstract class Trouper<Message extends QueueContext> {
         return queueName + "_RETRY";
     }
 
-    public final boolean publish(Message message) throws Exception {
+    public final void publish(Message message) throws Exception {
         publish(message, new AMQP.BasicProperties.Builder().contentType("text/plain").deliveryMode(2).headers(new HashMap<>()).build());
-        return true;
     }
 
     private void publish(Message message, AMQP.BasicProperties properties) throws Exception {
@@ -141,7 +140,7 @@ public abstract class Trouper<Message extends QueueContext> {
         log.info("Published to {}: {}", getSidelineQueue(), message);
     }
 
-    public final boolean retryPublish(Message message, int retryCount, long expiration) throws Exception {
+    public final void retryPublish(Message message, int retryCount, long expiration) throws Exception {
         Map<String, Object> headers = new HashMap<String, Object>() {
             {
                 put(RETRY_COUNT, retryCount);
@@ -158,8 +157,6 @@ public abstract class Trouper<Message extends QueueContext> {
         );
 
         log.info("Published to {}: {}", getRetryQueue(), message);
-
-        return true;
     }
 
     private void ensureExchange(String exchange) throws IOException {
