@@ -43,6 +43,12 @@
         </license>
     </licenses>
 
+    <scm>
+        <url>https://github.com/koushikr/qtrouper</url>
+        <connection>scm:git:git://github.com/koushikr/qtrouper.git</connection>
+        <developerConnection>scm:git:git@github.com:koushikr/qtrouper.git</developerConnection>
+    </scm>
+
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
