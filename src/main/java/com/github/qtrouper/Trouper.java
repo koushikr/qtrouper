@@ -1,11 +1,11 @@
 package com.github.qtrouper;
 
-import com.github.qtrouper.core.models.QAccessInfo;
-import com.github.qtrouper.core.models.QueueContext;
-import com.github.qtrouper.core.rabbit.RabbitConnection;
 import com.github.qtrouper.core.config.QueueConfiguration;
 import com.github.qtrouper.core.config.RetryConfiguration;
 import com.github.qtrouper.core.config.SidelineConfiguration;
+import com.github.qtrouper.core.models.QAccessInfo;
+import com.github.qtrouper.core.models.QueueContext;
+import com.github.qtrouper.core.rabbit.RabbitConnection;
 import com.github.qtrouper.utils.SerDe;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
