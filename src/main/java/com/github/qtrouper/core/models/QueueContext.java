@@ -19,13 +19,13 @@ import java.util.Map;
 @ToString
 public class QueueContext implements Serializable{
 
-    private String referenceId;
+    private String serviceReference;
 
     private Map<String, Object> data = new HashMap<>();
 
     @Builder
     public QueueContext(String serviceReference) {
-        this.referenceId = serviceReference;
+        this.serviceReference = serviceReference;
     }
 
     public <T> void addContext(Class<T> klass, T value) {
