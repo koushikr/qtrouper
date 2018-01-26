@@ -24,12 +24,15 @@ public class RabbitConfiguration {
     @NotEmpty
     private List<RabbitBroker> brokers;
 
+    @Builder.Default
     private int threadPoolSize = 128;
 
     @NotNull
+    @Builder.Default
     private String userName = "";
 
     @NotNull
+    @Builder.Default
     private String password = "";
 
     private String virtualHost;

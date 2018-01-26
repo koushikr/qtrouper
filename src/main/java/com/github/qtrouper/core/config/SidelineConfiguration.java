@@ -14,7 +14,8 @@ import lombok.*;
 @Builder
 public class SidelineConfiguration {
 
-    private boolean enabled;
+    @Builder.Default
+    private boolean enabled = true;
 
     private int concurrency;
 

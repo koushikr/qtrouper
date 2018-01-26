@@ -44,7 +44,7 @@ public abstract class Trouper<Message extends QueueContext> {
     private Channel publishChannel;
     private List<Handler> handlers = Lists.newArrayList();
 
-    protected Trouper(
+    public Trouper(
             String queueName,
             QueueConfiguration config,
             RabbitConnection connection,
