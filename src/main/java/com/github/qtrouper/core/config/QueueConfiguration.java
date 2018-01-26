@@ -36,16 +36,4 @@ public class QueueConfiguration {
 
     private SidelineConfiguration sideline;
 
-    public static QueueConfiguration getDefaultConfiguration(String queueName) {
-        return QueueConfiguration.builder()
-                .namespace(DEFAULT_NAMESPACE)
-                .queueName(queueName)
-                .prefetchCount(1)
-                .concurrency(3)
-                .retry(RetryConfiguration.getDefaultRetryConfiguration())
-                .sideline(SidelineConfiguration.getDefaultConfiguration())
-                .build();
-    }
-
-
 }
