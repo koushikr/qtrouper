@@ -12,10 +12,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dropwizard.version>1.1.4</dropwizard.version>
         <lombok.version>1.16.18</lombok.version>
-        <cglib.version>3.2.5</cglib.version>
         <guava.version>23.0</guava.version>
         <junit.version>4.12</junit.version>
         <mockito.version>2.9.0</mockito.version>
+        <cglib.version>3.2.5</cglib.version>
         <amqp.version>3.6.5</amqp.version>
     </properties>
   
@@ -27,15 +27,6 @@
         </repository>
     </distributionManagement>
 
-     <licenses>
-        <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
-            <comments>A business-friendly OSS license</comments>
-        </license>
-    </licenses>
-
      <developers>
         <developer>
             <id>koushikr</id>
@@ -44,7 +35,19 @@
         </developer>
     </developers>
 
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
+    <scm>
+        <url>https://github.com/koushikr/qtrouper</url>
+        <connection>scm:git:git://github.com/koushikr/qtrouper.git</connection>
+        <developerConnection>scm:git:git@github.com:koushikr/qtrouper.git</developerConnection>
+    </scm>
 
     <dependencies>
         <dependency>
@@ -77,6 +80,7 @@
             <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>

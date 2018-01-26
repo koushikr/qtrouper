@@ -15,7 +15,8 @@ import lombok.*;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RetryConfiguration {
 
-    private boolean enabled;
+    @Builder.Default
+    private boolean enabled = true;
 
     private long ttlMs;
 

@@ -44,7 +44,7 @@ public abstract class Trouper<Message extends QueueContext> {
     private Channel publishChannel;
     private List<Handler> handlers = Lists.newArrayList();
 
-    protected Trouper(
+    public Trouper(
             String queueName,
             QueueConfiguration config,
             RabbitConnection connection,
@@ -69,6 +69,21 @@ public abstract class Trouper<Message extends QueueContext> {
 
     public abstract boolean processSideline(Message message, QAccessInfo accessInfo);
 
+    /**
+     * Handle does the following things.
+     *
+     * Calls the appropriate process method on the consumer.
+     * If the process method succeeds, returns true and exits.
+     * If otherwise, checks if retry is enabled.
+     * If retry ain't enabled, publishes to sideline and returns
+     * If retry is enabled, checks the current count for retry.
+     * If retryCount is greater than maxRetries, publishes to sideline and exits
+     * If otherwise, increments the retryCount and publishes into retryQueue : which would further deadLetter into mainQueue after ttl.
+     * @param message           {@link Message}                 The message that is associated with the Trouper
+     * @param properties        {@link AMQP.BasicProperties}    The AMQP Basic Properties
+     * @return  if the handle is successful or otherwise.
+     * @throws Exception
+     */
     private boolean handle(Message message, AMQP.BasicProperties properties) throws Exception {
         boolean processed = process(message, getAccessInformation(properties));
 
@@ -140,6 +155,14 @@ public abstract class Trouper<Message extends QueueContext> {
         log.info("Published to {}: {}", getSidelineQueue(), message);
     }
 
+    /**
+     * Sets the retryCount and expiration and publishes into the retry queue
+     * which would further deadLetter into the mainQueue.
+     * @param message           {@link Message}     The message that is associated with the Trouper
+     * @param retryCount        {@link Integer}     The currentRetryCount of the message
+     * @param expiration        {@link Long}        The current expiration in milliseconds
+     * @throws Exception
+     */
     public final void retryPublish(Message message, int retryCount, long expiration) throws Exception {
         Map<String, Object> headers = new HashMap<String, Object>() {
             {
@@ -171,6 +194,17 @@ public abstract class Trouper<Message extends QueueContext> {
                         .build());
     }
 
+    /**
+     * Creates the required exchanges and queues.
+     *
+     * Creates a mainExchange and a retryExchange, with retryExchange dead lettering into the mainExchange
+     * Creates main queues and sideline queues on mainExchange and retryQueues on retryExchange
+     *
+     * Binds the consumers on both main and sideline queues depending on the appropriate configuration
+     * settings defined.
+     *
+     * @throws Exception
+     */
     public void start() throws Exception {
         String exchange = this.config.getNamespace();
         String dlExchange = getRetryExchange();
@@ -250,6 +284,21 @@ public abstract class Trouper<Message extends QueueContext> {
             getChannel().basicQos(prefetchCount);
         }
 
+        /**
+         * Understands if the consumer is for the mainQueue or the sideline Queue
+         * Calls appropriate process methods.
+         *
+         * If message handling is successful, acknowledges the connection with multiple re-queues set to false.
+         * If message handling is unsuccessful, rejects the message setting requeue to true.
+         *
+         * In case of any exceptions, checks if any of the exceptions are whitelisted, and repeats the above.
+         *
+         * @param consumerTag       {@link String}              The consumerTag associated with the message
+         * @param envelope          {@link Envelope}            RabbitMQ Envelope object
+         * @param properties        {@link AMQP.BasicProperties}AMQP BasicProperties associated with the message
+         * @param body              {@link Byte[]}              ByteArray representing the message
+         * @throws IOException
+         */
         @Override
         public void handleDelivery(String consumerTag, Envelope envelope,
                                    AMQP.BasicProperties properties, byte[] body) throws IOException {

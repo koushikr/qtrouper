@@ -27,12 +27,16 @@ public class RabbitConnection implements Managed{
     private Connection connection;
     private Channel channel;
 
-    public RabbitConnection(RabbitConfiguration rabbitConfiguration) throws Exception {
+    public RabbitConnection(RabbitConfiguration rabbitConfiguration) {
         this.config = rabbitConfiguration;
-
-        this.start();
     }
 
+    /**
+     * Starts the RabbitMQ Connection.
+     * Sets the required username, password and other connection settings.
+     * Creates both the connection and a default channel which would later be used for publish
+     * @throws Exception
+     */
     public void start() throws Exception {
         log.info("Starting Rabbit Connection");
 
@@ -56,6 +60,11 @@ public class RabbitConnection implements Managed{
         log.info("Started Rabbit Connection");
     }
 
+    /**
+     * Destroys the channel and connection.
+     * Gets triggered during shutdown
+     * @throws Exception
+     */
     public void stop() throws Exception {
         if (null != channel && channel.isOpen()) {
             channel.close();

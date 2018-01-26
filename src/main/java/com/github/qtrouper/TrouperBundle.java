@@ -21,8 +21,14 @@ public abstract class TrouperBundle<T extends Configuration> implements Configur
 
     public abstract RabbitConfiguration getRabbitConfiguration(T configuration);
 
+    /**
+     * Sets the objectMapper properties and initializes RabbitConnection, along with its health check
+     * @param configuration     {@link T}               The typed configuration against which the said TrouperBundle is initialized
+     * @param environment       {@link Environment}     The dropwizard environment object.
+     * @throws Exception
+     */
     @Override
-    public void run(T configuration, Environment environment) throws Exception {
+    public void run(T configuration, Environment environment){
         environment.getObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         environment.getObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
         environment.getObjectMapper().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
@@ -43,3 +49,5 @@ public abstract class TrouperBundle<T extends Configuration> implements Configur
 
     }
 }
+
+
