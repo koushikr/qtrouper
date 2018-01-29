@@ -9,8 +9,10 @@ import com.github.qtrouper.core.rabbit.RabbitConnection;
 import com.github.qtrouper.utils.SerDe;
 import io.dropwizard.Configuration;
 import io.dropwizard.ConfiguredBundle;
+import io.dropwizard.lifecycle.Managed;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
@@ -20,6 +22,8 @@ import lombok.NoArgsConstructor;
 public abstract class TrouperBundle<T extends Configuration> implements ConfiguredBundle<T> {
 
     public abstract RabbitConfiguration getRabbitConfiguration(T configuration);
+    @Getter
+    private RabbitConnection rabbitConnection;
 
     /**
      * Sets the objectMapper properties and initializes RabbitConnection, along with its health check
@@ -38,9 +42,19 @@ public abstract class TrouperBundle<T extends Configuration> implements Configur
 
         SerDe.init(environment.getObjectMapper());
 
-        final RabbitConnection rabbitConnection = new RabbitConnection(getRabbitConfiguration(configuration));
+        rabbitConnection = new RabbitConnection(getRabbitConfiguration(configuration));
 
-        environment.lifecycle().manage(rabbitConnection);
+        environment.lifecycle().manage(new Managed() {
+            @Override
+            public void start() throws Exception {
+                rabbitConnection.start();
+            }
+
+            @Override
+            public void stop() throws Exception {
+                rabbitConnection.stop();
+            }
+        });
         environment.healthChecks().register("qTrouper-health-check", new TrouperHealthCheck(rabbitConnection));
     }
 

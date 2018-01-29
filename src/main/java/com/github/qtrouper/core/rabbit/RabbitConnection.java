@@ -21,7 +21,7 @@ import java.util.concurrent.Executors;
 @Slf4j
 @Singleton
 @Getter
-public class RabbitConnection implements Managed{
+public class RabbitConnection {
 
     private final RabbitConfiguration config;
     private Connection connection;
