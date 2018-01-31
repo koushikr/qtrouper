@@ -96,7 +96,7 @@ public abstract class Trouper<Message extends QueueContext> {
             int retryCount = (int) properties.getHeaders().getOrDefault(RETRY_COUNT, 0);
 
             if (retryCount > retry.getMaxRetries()) {
-                sidelinePublish(message, properties);
+                sidelinePublish(message);
                 return true;
             }
 
@@ -109,7 +109,7 @@ public abstract class Trouper<Message extends QueueContext> {
 
             return true;
         }else{
-            sidelinePublish(message, properties);
+            sidelinePublish(message);
             return true;
         }
     }
@@ -147,10 +147,10 @@ public abstract class Trouper<Message extends QueueContext> {
 
     }
 
-    private void sidelinePublish(Message message, AMQP.BasicProperties properties) throws Exception {
+    private void sidelinePublish(Message message) throws Exception {
         log.info("Publishing to {}: {}", getSidelineQueue(), message);
 
-        publishChannel.basicPublish(this.config.getNamespace(), getSidelineQueue(), properties, SerDe.mapper().writeValueAsBytes(message));
+        publishChannel.basicPublish(this.config.getNamespace(), getSidelineQueue(),  new AMQP.BasicProperties.Builder().contentType("text/plain").deliveryMode(2).headers(new HashMap<>()).build(), SerDe.mapper().writeValueAsBytes(message));
 
         log.info("Published to {}: {}", getSidelineQueue(), message);
     }
