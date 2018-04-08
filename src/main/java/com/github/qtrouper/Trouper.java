@@ -138,6 +138,10 @@ public abstract class Trouper<Message extends QueueContext> {
         publish(message, new AMQP.BasicProperties.Builder().contentType("text/plain").deliveryMode(2).headers(new HashMap<>()).build());
     }
 
+    public final void publish(Message message, Map<String, Object> headers) throws Exception {
+        publish(message, new AMQP.BasicProperties.Builder().contentType("text/plain").deliveryMode(2).headers(headers).build());
+    }
+
     private void publish(Message message, AMQP.BasicProperties properties) throws Exception {
         log.info("Publishing to {}: {}", queueName, message);
 
