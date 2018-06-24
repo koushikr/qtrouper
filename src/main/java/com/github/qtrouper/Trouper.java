@@ -148,7 +148,7 @@ public abstract class Trouper<Message extends QueueContext> {
 
     }
 
-    private void sidelinePublish(Message message) throws Exception {
+    public void sidelinePublish(Message message) throws Exception {
         log.info("Publishing to {}: {}", getSidelineQueue(), message);
 
         publishChannel.basicPublish(this.config.getNamespace(), getSidelineQueue(),  new AMQP.BasicProperties.Builder().contentType("text/plain").deliveryMode(2).headers(new HashMap<>()).build(), SerDe.mapper().writeValueAsBytes(message));
