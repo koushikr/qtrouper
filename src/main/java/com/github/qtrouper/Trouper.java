@@ -118,6 +118,7 @@ public abstract class Trouper<Message extends QueueContext> {
         int retryCount = (int) properties.getHeaders().getOrDefault(RETRY_COUNT, 0);
 
         return QAccessInfo.builder()
+                .retryCount(retryCount)
                 .idempotencyCheckRequired(retryCount > 0)
                 .build();
     }
