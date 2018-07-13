@@ -14,4 +14,6 @@ public class QAccessInfo {
 
     private boolean idempotencyCheckRequired;
 
+    private int retryCount;
+
 }
