@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.koushikr</groupId>
   <artifactId>qtrouper</artifactId>
-  <version>0.0.6</version>
+  <version>0.0.7</version>
   <packaging>jar</packaging>
     <properties>
         <!-- github server corresponds to entry in ~/.m2/settings.xml -->

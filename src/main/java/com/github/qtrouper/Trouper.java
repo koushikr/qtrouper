@@ -220,27 +220,29 @@ public abstract class Trouper<Message extends QueueContext> {
         connection.ensure(getSidelineQueue(), this.config.getNamespace(), connection.rmqOpts());
 
 
-        for (int i = 1; i <= config.getConcurrency(); i++) {
-            Channel consumeChannel = connection.newChannel();
-            final Handler handler = new Handler(consumeChannel,
-                    clazz, prefetchCount, this, false);
-            final String tag = consumeChannel.basicConsume(queueName, false, handler);
-            handler.setTag(tag);
-            handlers.add(handler);
-            log.info("Started consumer {} of type {}", i, queueName);
-        }
-
-        SidelineConfiguration sidelineConfiguration = config.getSideline();
-
-        if (sidelineConfiguration.isEnabled()) {
-            for (int i = 1; i <= sidelineConfiguration.getConcurrency(); i++) {
+        if (config.isConsumerAvailable()) {
+            for (int i = 1; i <= config.getConcurrency(); i++) {
                 Channel consumeChannel = connection.newChannel();
                 final Handler handler = new Handler(consumeChannel,
-                        clazz, prefetchCount, this, true);
-                final String tag = consumeChannel.basicConsume(getSidelineQueue(), false, handler);
+                        clazz, prefetchCount, this, false);
+                final String tag = consumeChannel.basicConsume(queueName, false, handler);
                 handler.setTag(tag);
                 handlers.add(handler);
-                log.info("Started sideline consumer {} of type {}", i, getSidelineQueue());
+                log.info("Started consumer {} of type {}", i, queueName);
+            }
+
+            SidelineConfiguration sidelineConfiguration = config.getSideline();
+
+            if (sidelineConfiguration.isEnabled()) {
+                for (int i = 1; i <= sidelineConfiguration.getConcurrency(); i++) {
+                    Channel consumeChannel = connection.newChannel();
+                    final Handler handler = new Handler(consumeChannel,
+                            clazz, prefetchCount, this, true);
+                    final String tag = consumeChannel.basicConsume(getSidelineQueue(), false, handler);
+                    handler.setTag(tag);
+                    handlers.add(handler);
+                    log.info("Started sideline consumer {} of type {}", i, getSidelineQueue());
+                }
             }
         }
     }
