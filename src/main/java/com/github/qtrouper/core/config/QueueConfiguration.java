@@ -35,6 +35,8 @@ public class QueueConfiguration {
     @Builder.Default
     private int prefetchCount = 1;
 
+    private boolean consumerAvailable;
+
     private RetryConfiguration retry;
 
     private SidelineConfiguration sideline;
