@@ -46,6 +46,10 @@ public class RabbitConnection {
         if (!Strings.isNullOrEmpty(config.getPassword())) factory.setPassword(config.getPassword());
         if (!Strings.isNullOrEmpty(config.getVirtualHost())) factory.setVirtualHost(config.getVirtualHost());
 
+        if(config.isSslEnabled()){
+           factory.useSslProtocol();
+        }
+
         factory.setAutomaticRecoveryEnabled(true);
         factory.setTopologyRecoveryEnabled(true);
         factory.setNetworkRecoveryInterval(3000);
