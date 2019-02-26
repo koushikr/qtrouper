@@ -36,4 +36,6 @@ public class RabbitConfiguration {
     private String password = "";
 
     private String virtualHost;
+
+    private boolean sslEnabled;
 }
