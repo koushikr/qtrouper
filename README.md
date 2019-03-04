@@ -20,7 +20,7 @@ You could find the dependency at
     <dependency>
             <groupId>com.github.koushikr</groupId>
             <artifactId>qtrouper</artifactId>
-            <version>0.0.1</version>
+            <version>0.0.9</version>
     </dependency>
 ```
 
