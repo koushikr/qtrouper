@@ -1,6 +1,7 @@
 package com.github.qtrouper.core.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import javax.ws.rs.DefaultValue;
 import lombok.*;
 
 import javax.validation.constraints.Max;
@@ -35,7 +36,8 @@ public class QueueConfiguration {
     @Builder.Default
     private int prefetchCount = 1;
 
-    private boolean consumerAvailable;
+    @Builder.Default
+    private boolean consumerAvailable=true;
 
     private RetryConfiguration retry;
 
