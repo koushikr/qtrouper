@@ -150,9 +150,9 @@ public abstract class Trouper<Message extends QueueContext> {
     /**
      * Publish messages which gets expired at given timestamp if expiration is enabled
      *
-     * @param message The message which gets published
-     * @param expiresAt The timestamp at which a message gets expired if expiration is enabled
-     * @param expiresAtEnabled A flag to determine if message expiration is enabled or not
+     * @param message           {@link Message}             The message which gets published
+     * @param expiresAt         {@link Long}                The timestamp at which a message gets expired if expiration is enabled
+     * @param expiresAtEnabled  {@link Boolean}             A flag to determine if message expiration is enabled or not
      */
     public final void publishWithExpiry(Message message, long expiresAt, boolean expiresAtEnabled) throws Exception {
       Map<String, Object> headers = new HashMap<String, Object>() {
