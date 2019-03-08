@@ -92,7 +92,10 @@ public abstract class Trouper<Message extends QueueContext> {
 
         Long expiresAt = (Long) properties.getHeaders().getOrDefault(EXPIRES_AT_TIMESTAMP, 0);
 
-        if (expiresAtEnabled && expiresAt != null && expiresAt > System.currentTimeMillis()) return true;
+        if (expiresAtEnabled && expiresAt != null && expiresAt > System.currentTimeMillis()){
+            log.info("Consuming message due to expiry {}", message);
+            return true;
+        }
 
         boolean processed = process(message, getAccessInformation(properties));
 
