@@ -34,6 +34,8 @@ public abstract class Trouper<Message extends QueueContext> {
 
     private static final String RETRY_COUNT = "x-retry-count";
     private static final String EXPIRATION = "x-message-ttl";
+    private static final String EXPIRES_AT_TIMESTAMP = "x-expires-timestamp";
+    private static final String EXPIRES_AT_ENABLED = "x-expires-enabled";
 
     private final QueueConfiguration config;
     private final RabbitConnection connection;
@@ -85,6 +87,16 @@ public abstract class Trouper<Message extends QueueContext> {
      * @throws Exception
      */
     private boolean handle(Message message, AMQP.BasicProperties properties) throws Exception {
+
+        boolean expiresAtEnabled = (Boolean) properties.getHeaders().getOrDefault(EXPIRES_AT_ENABLED, false);
+
+        long expiresAt = (Long) properties.getHeaders().getOrDefault(EXPIRES_AT_TIMESTAMP, 0);
+
+        if (expiresAtEnabled && expiresAt > System.currentTimeMillis()){
+            log.info("Ignoring message due to expiry {}", message);
+            return true;
+        }
+
         boolean processed = process(message, getAccessInformation(properties));
 
         if (processed) return true;
@@ -105,7 +117,7 @@ public abstract class Trouper<Message extends QueueContext> {
             long expiration = (long) properties.getHeaders().getOrDefault(EXPIRATION, retry.getTtlMs());
             long newExpiration = expiration * retry.getBackOffFactor();
 
-            retryPublish(message, retryCount, newExpiration);
+            retryPublishWithExpiry(message, retryCount, newExpiration, expiresAt, expiresAtEnabled);
 
             return true;
         }else{
@@ -137,6 +149,23 @@ public abstract class Trouper<Message extends QueueContext> {
 
     public final void publish(Message message) throws Exception {
         publish(message, new AMQP.BasicProperties.Builder().contentType("text/plain").deliveryMode(2).headers(new HashMap<>()).build());
+    }
+
+    /**
+     * Publish messages which gets expired at given timestamp if expiration is enabled
+     *
+     * @param message           {@link Message}             The message which gets published
+     * @param expiresAt         {@link Long}                The timestamp at which a message gets expired if expiration is enabled
+     * @param expiresAtEnabled  {@link Boolean}             A flag to determine if message expiration is enabled or not
+     */
+    public final void publishWithExpiry(Message message, long expiresAt, boolean expiresAtEnabled) throws Exception {
+      Map<String, Object> headers = new HashMap<String, Object>() {
+        {
+          put(EXPIRES_AT_TIMESTAMP, expiresAt);
+          put(EXPIRES_AT_ENABLED, expiresAtEnabled);
+        }
+      };
+      publish(message, headers);
     }
 
     public final void publish(Message message, Map<String, Object> headers) throws Exception {
@@ -178,13 +207,49 @@ public abstract class Trouper<Message extends QueueContext> {
 
         AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder().contentType("text/plain").expiration(String.valueOf(expiration)).deliveryMode(2).headers(headers).build();
 
-        connection.getChannel().basicPublish(
-                getRetryExchange(),
-                getRetryQueue(),
-                properties, SerDe.mapper().writeValueAsBytes(message)
-        );
+        retryPublish(message, properties);
+    }
 
-        log.info("Published to {}: {}", getRetryQueue(), message);
+    /**
+     * Sets the retryCount, expiration, expiryTimestamp and publishes into the retry queue which would further
+     * deadLetter into the mainQueue.
+     *
+     * @param message {@link Message}     The message that is associated with the Trouper
+     * @param retryCount {@link Integer}     The currentRetryCount of the message
+     * @param expiration {@link Long}        The current expiration in milliseconds
+     * @param expiresAt {@link Long}        The timestamp at which the message should expire
+     * @param expiresAtEnabled {@link Boolean}     Flag to determine whether the message should expire at expiresAt timestamp
+     */
+    public final void retryPublishWithExpiry(Message message, int retryCount, long expiration,
+        long expiresAt, boolean expiresAtEnabled)
+        throws Exception {
+      Map<String, Object> headers = new HashMap<String, Object>() {
+        {
+          put(RETRY_COUNT, retryCount);
+          put(EXPIRATION, expiration);
+          put(EXPIRES_AT_ENABLED, expiresAtEnabled);
+          put(EXPIRES_AT_TIMESTAMP, expiresAt);
+        }
+      };
+
+      AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder().contentType("text/plain")
+          .expiration(String.valueOf(expiration)).deliveryMode(2).headers(headers).build();
+
+      retryPublish(message, properties);
+    }
+
+    private void retryPublish(Message message, AMQP.BasicProperties properties)
+        throws Exception {
+
+      log.info("Publishing to {}: {}", getRetryQueue(), message);
+
+      connection.getChannel().basicPublish(
+          getRetryExchange(),
+          getRetryQueue(),
+          properties, SerDe.mapper().writeValueAsBytes(message)
+      );
+
+      log.info("Published to {}: {}", getRetryQueue(), message);
     }
 
     private void ensureExchange(String exchange) throws IOException {
