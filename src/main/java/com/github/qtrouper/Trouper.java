@@ -87,15 +87,16 @@ public abstract class Trouper<Message extends QueueContext> {
      * @throws Exception
      */
     private boolean handle(Message message, AMQP.BasicProperties properties) throws Exception {
+
+        Boolean expiresAtEnabled = (Boolean) properties.getHeaders().getOrDefault(EXPIRES_AT_ENABLED, false);
+
+        Long expiresAt = (Long) properties.getHeaders().getOrDefault(EXPIRES_AT_TIMESTAMP, 0);
+
+        if (expiresAtEnabled && expiresAt != null && expiresAt > System.currentTimeMillis()) return true;
+
         boolean processed = process(message, getAccessInformation(properties));
 
         if (processed) return true;
-
-        boolean expiresAtEnabled = (boolean) properties.getHeaders().getOrDefault(EXPIRES_AT_ENABLED, false);
-
-        long expiresAt = (long) properties.getHeaders().getOrDefault(EXPIRES_AT_TIMESTAMP, 0);
-
-        if (expiresAtEnabled && expiresAt > System.currentTimeMillis()) return true;
 
         RetryConfiguration retry = config.getRetry();
 
