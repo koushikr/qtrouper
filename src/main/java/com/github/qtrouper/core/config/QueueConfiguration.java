@@ -36,8 +36,7 @@ public class QueueConfiguration {
     @Builder.Default
     private int prefetchCount = 1;
 
-    @Builder.Default
-    private boolean consumerAvailable=true;
+    private boolean consumerDisabled;
 
     private RetryConfiguration retry;
 

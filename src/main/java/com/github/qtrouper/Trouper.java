@@ -289,7 +289,7 @@ public abstract class Trouper<Message extends QueueContext> {
         connection.ensure(getSidelineQueue(), this.config.getNamespace(), connection.rmqOpts());
 
 
-        if (config.isConsumerAvailable()) {
+        if (!config.isConsumerDisabled()) {
             for (int i = 1; i <= config.getConcurrency(); i++) {
                 Channel consumeChannel = connection.newChannel();
                 final Handler handler = new Handler(consumeChannel,
