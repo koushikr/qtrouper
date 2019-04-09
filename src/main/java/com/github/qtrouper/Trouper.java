@@ -90,7 +90,7 @@ public abstract class Trouper<Message extends QueueContext> {
 
         boolean expiresAtEnabled = (Boolean) properties.getHeaders().getOrDefault(EXPIRES_AT_ENABLED, false);
 
-        long expiresAt = (Long) properties.getHeaders().getOrDefault(EXPIRES_AT_TIMESTAMP, 0);
+        long expiresAt = (Long) properties.getHeaders().getOrDefault(EXPIRES_AT_TIMESTAMP, 0L);
 
         if (expiresAtEnabled && expiresAt > System.currentTimeMillis()){
             log.info("Ignoring message due to expiry {}", message);
