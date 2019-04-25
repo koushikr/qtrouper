@@ -6,7 +6,7 @@
   <artifactId>qtrouper</artifactId>
   <version>0.0.11</version>
   <packaging>jar</packaging>
-    <properties>p
+    <properties>
         <!-- github server corresponds to entry in ~/.m2/settings.xml -->
         <github.global.server>github</github.global.server>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
