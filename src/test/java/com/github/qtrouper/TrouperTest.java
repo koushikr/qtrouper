@@ -10,6 +10,7 @@ import com.github.qtrouper.core.rabbit.RabbitConfiguration;
 import com.github.qtrouper.core.rabbit.RabbitConnection;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
+import java.util.HashMap;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -165,5 +166,6 @@ public class TrouperTest {
         Trouper trouper = getTrouperAfterStart(queueConfiguration);
 
         Assert.assertTrue(trouper.getHandlers().size() == 20);
+
     }
 }

@@ -4,9 +4,9 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.koushikr</groupId>
   <artifactId>qtrouper</artifactId>
-  <version>0.0.10</version>
+  <version>0.0.11</version>
   <packaging>jar</packaging>
-    <properties>
+    <properties>p
         <!-- github server corresponds to entry in ~/.m2/settings.xml -->
         <github.global.server>github</github.global.server>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
