@@ -72,6 +72,16 @@ public abstract class Trouper<Message extends QueueContext> {
     public abstract boolean processSideline(Message message, QAccessInfo accessInfo);
 
     /**
+     * Determines if a message is expired. Checks if message expiry is enabled and current time is more than expiry time.
+     * @param expiresAtEnabled  {@link Boolean}         Whether message expiry is enabled or not
+     * @param expiresAt         {@link Long}            The time at which the messsage is set to expire
+     * @return
+     */
+    private boolean isMessageExpired(boolean expiresAtEnabled, long expiresAt){
+        return expiresAtEnabled && expiresAt != 0 && expiresAt < System.currentTimeMillis();
+    }
+
+    /**
      * Handle does the following things.
      *
      * Calls the appropriate process method on the consumer.
@@ -92,7 +102,7 @@ public abstract class Trouper<Message extends QueueContext> {
 
         long expiresAt = (Long) properties.getHeaders().getOrDefault(EXPIRES_AT_TIMESTAMP, 0L);
 
-        if (expiresAtEnabled && expiresAt > System.currentTimeMillis()){
+        if (isMessageExpired(expiresAtEnabled, expiresAt)){
             log.info("Ignoring message due to expiry {}", message);
             return true;
         }
@@ -289,7 +299,7 @@ public abstract class Trouper<Message extends QueueContext> {
         connection.ensure(getSidelineQueue(), this.config.getNamespace(), connection.rmqOpts());
 
 
-        if (!config.isConsumerDisabled()) {
+        if (config.isConsumerEnabled()) {
             for (int i = 1; i <= config.getConcurrency(); i++) {
                 Channel consumeChannel = connection.newChannel();
                 final Handler handler = new Handler(consumeChannel,

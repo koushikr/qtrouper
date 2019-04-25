@@ -1,5 +1,6 @@
 package com.github.qtrouper.core.config;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.ws.rs.DefaultValue;
 import lombok.*;
@@ -41,5 +42,10 @@ public class QueueConfiguration {
     private RetryConfiguration retry;
 
     private SidelineConfiguration sideline;
+
+    @JsonIgnore
+    public boolean isConsumerEnabled(){
+        return !consumerDisabled;
+    }
 
 }
