@@ -111,7 +111,7 @@ public class TrouperTest {
                 .namespace(DEFAULT_NAMESPACE)
                 .concurrency(0)
                 .prefetchCount(10)
-                .consumerAvailable(false)
+                .consumerDisabled(true)
                 .build();
 
         getTrouperAfterStart(queueConfiguration);
@@ -124,7 +124,7 @@ public class TrouperTest {
                 .namespace(DEFAULT_NAMESPACE)
                 .concurrency(0)
                 .prefetchCount(10)
-                .consumerAvailable(true)
+                .consumerDisabled(false)
                 .retry(getRetryConfiguration(false, 10))
                 .sideline(getSidelineConfiguration(false, 0))
                 .build();
@@ -139,7 +139,7 @@ public class TrouperTest {
                 .namespace(DEFAULT_NAMESPACE)
                 .concurrency(0)
                 .prefetchCount(10)
-                .consumerAvailable(true)
+                .consumerDisabled(false)
                 .retry(getRetryConfiguration(false, 10))
                 .sideline(getSidelineConfiguration(true, 1))
                 .build();
@@ -158,7 +158,7 @@ public class TrouperTest {
                 .namespace(DEFAULT_NAMESPACE)
                 .concurrency(10)
                 .prefetchCount(10)
-                .consumerAvailable(true)
+                .consumerDisabled(false)
                 .retry(getRetryConfiguration(false, 10))
                 .sideline(getSidelineConfiguration(true, 10))
                 .build();
