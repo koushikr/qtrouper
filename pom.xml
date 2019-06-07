@@ -32,8 +32,6 @@
     </developers>
 
     <properties>
-        <!-- github server corresponds to entry in ~/.m2/settings.xml -->
-        <github.global.server>github</github.global.server>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dropwizard.version>1.2.2</dropwizard.version>
         <lombok.version>1.18.6</lombok.version>
