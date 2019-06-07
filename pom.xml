@@ -1,11 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.github.koushikr</groupId>
-  <artifactId>qtrouper</artifactId>
-  <version>0.1.1</version>
-  <packaging>jar</packaging>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>io.github.qtrouper</groupId>
+    <artifactId>qtrouper</artifactId>
+    <version>0.1.1</version>
+    <packaging>jar</packaging>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:https://github.com/koushikr/qtrouper.git</connection>
+        <developerConnection>scm:git:https://github.com/koushikr/qtrouper.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://github.com/koushikr/qtrouper.git</url>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>koushikr</id>
+            <name>Koushik Ramachandra</name>
+            <email>rkoushik.14@gmail.com</email>
+        </developer>
+    </developers>
+
     <properties>
         <!-- github server corresponds to entry in ~/.m2/settings.xml -->
         <github.global.server>github</github.global.server>
@@ -18,36 +43,6 @@
         <cglib.version>3.2.5</cglib.version>
         <amqp.version>4.8.0</amqp.version>
     </properties>
-  
-    <distributionManagement>
-        <repository>
-            <id>internal.repo</id>
-            <name>Temporary Staging Repository</name>
-            <url>file://${project.build.directory}/mvn-repo</url>
-        </repository>
-    </distributionManagement>
-
-     <developers>
-        <developer>
-            <id>koushikr</id>
-            <name>Koushik Ramachandra</name>
-            <email>koushiksmiles@gmail.com</email>
-        </developer>
-    </developers>
-
-    <licenses>
-        <license>
-            <name>MIT License</name>
-            <url>http://www.opensource.org/licenses/mit-license.php</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-
-    <scm>
-        <url>https://github.com/koushikr/qtrouper</url>
-        <connection>scm:git:git://github.com/koushikr/qtrouper.git</connection>
-        <developerConnection>scm:git:git@github.com:koushikr/qtrouper.git</developerConnection>
-    </scm>
 
     <dependencies>
         <dependency>
@@ -140,4 +135,21 @@
         </plugin>
  </plugins>
   </build>
+
+    <repositories>
+        <repository>
+            <id>clojars</id>
+            <name>Clojars repository</name>
+            <url>https://clojars.org/repo</url>
+        </repository>
+    </repositories>
+
+
+    <distributionManagement>
+        <repository>
+            <id>clojars</id>
+            <name>Clojars repository</name>
+            <url>https://clojars.org/repo</url>
+        </repository>
+    </distributionManagement>
 </project>
