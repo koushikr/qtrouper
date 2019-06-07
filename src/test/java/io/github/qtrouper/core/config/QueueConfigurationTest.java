@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.qtrouper.core.config;
+package io.github.qtrouper.core.config;
 
 import org.junit.Assert;
 import org.junit.Test;

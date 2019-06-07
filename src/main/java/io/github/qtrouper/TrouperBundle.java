@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.qtrouper;
+package io.github.qtrouper;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.github.qtrouper.core.healthchecks.TrouperHealthCheck;
-import com.github.qtrouper.core.rabbit.RabbitConfiguration;
-import com.github.qtrouper.core.rabbit.RabbitConnection;
-import com.github.qtrouper.utils.SerDe;
+import io.github.qtrouper.core.healthchecks.TrouperHealthCheck;
+import io.github.qtrouper.core.rabbit.RabbitConfiguration;
+import io.github.qtrouper.core.rabbit.RabbitConnection;
+import io.github.qtrouper.utils.SerDe;
 import io.dropwizard.Configuration;
 import io.dropwizard.ConfiguredBundle;
 import io.dropwizard.lifecycle.Managed;

@@ -13,25 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.qtrouper.core.config;
+package io.github.qtrouper.core.rabbit;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.NotEmpty;
+
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 /**
  * @author koushik
  */
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
-public class SidelineConfiguration {
+public class RabbitBroker {
 
-    @Builder.Default
-    private boolean enabled = true;
+    @NotEmpty
+    @NotNull
+    private String host;
 
-    private int concurrency;
+    @Min(0)
+    @Max(65535)
+    private int port;
 
 }

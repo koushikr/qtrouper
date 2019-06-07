@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.qtrouper.core.rabbit;
+package io.github.qtrouper.core.rabbit;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;

@@ -13,53 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.qtrouper.core.config;
+package io.github.qtrouper.core.config;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
-
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 
 /**
  * @author koushik
  */
-@Data
-@EqualsAndHashCode
-@ToString
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class QueueConfiguration {
-
-    private static final String DEFAULT_NAMESPACE = "qtrouper";
+@Builder
+public class SidelineConfiguration {
 
     @Builder.Default
-    private String namespace = DEFAULT_NAMESPACE;
+    private boolean enabled = true;
 
-    private String queueName;
-
-    @Min(1)
-    @Max(100)
-    @Builder.Default
-    private int concurrency = 3;
-
-    @Min(1)
-    @Max(100)
-    @Builder.Default
-    private int prefetchCount = 1;
-
-    private boolean consumerDisabled;
-
-    private RetryConfiguration retry;
-
-    private SidelineConfiguration sideline;
-
-    @JsonIgnore
-    public boolean isConsumerEnabled(){
-        return !consumerDisabled;
-    }
+    private int concurrency;
 
 }

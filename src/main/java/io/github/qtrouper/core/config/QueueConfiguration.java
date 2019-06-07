@@ -13,44 +13,53 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.qtrouper.core.rabbit;
+package io.github.qtrouper.core.config;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.NotEmpty;
+import lombok.*;
 
-import javax.validation.constraints.NotNull;
-import java.util.List;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 
 /**
  * @author koushik
  */
 @Data
+@EqualsAndHashCode
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RabbitConfiguration {
+public class QueueConfiguration {
 
-    @NotNull
-    @NotEmpty
-    private List<RabbitBroker> brokers;
+    private static final String DEFAULT_NAMESPACE = "qtrouper";
 
     @Builder.Default
-    private int threadPoolSize = 128;
+    private String namespace = DEFAULT_NAMESPACE;
 
-    @NotNull
+    private String queueName;
+
+    @Min(1)
+    @Max(100)
     @Builder.Default
-    private String userName = "";
+    private int concurrency = 3;
 
-    @NotNull
+    @Min(1)
+    @Max(100)
     @Builder.Default
-    private String password = "";
+    private int prefetchCount = 1;
 
-    private String virtualHost;
+    private boolean consumerDisabled;
 
-    private boolean sslEnabled;
+    private RetryConfiguration retry;
+
+    private SidelineConfiguration sideline;
+
+    @JsonIgnore
+    public boolean isConsumerEnabled(){
+        return !consumerDisabled;
+    }
+
 }

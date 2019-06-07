@@ -13,30 +13,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.qtrouper.core.config;
+package io.github.qtrouper.core.rabbit;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.NotEmpty;
+
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * @author koushik
  */
 @Data
-@EqualsAndHashCode
-@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RetryConfiguration {
+public class RabbitConfiguration {
+
+    @NotNull
+    @NotEmpty
+    private List<RabbitBroker> brokers;
 
     @Builder.Default
-    private boolean enabled = true;
+    private int threadPoolSize = 128;
 
-    private long ttlMs;
+    @NotNull
+    @Builder.Default
+    private String userName = "";
 
-    private int maxRetries;
+    @NotNull
+    @Builder.Default
+    private String password = "";
 
-    private int backOffFactor; //multiplicationFactor
+    private String virtualHost;
 
+    private boolean sslEnabled;
 }

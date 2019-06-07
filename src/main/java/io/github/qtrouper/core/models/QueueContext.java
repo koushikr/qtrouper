@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.qtrouper.core.models;
+package io.github.qtrouper.core.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.github.qtrouper.utils.SerDe;
+import io.github.qtrouper.utils.SerDe;
 import com.google.common.base.Strings;
 import lombok.*;
 

@@ -13,33 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.qtrouper.core.rabbit;
+package io.github.qtrouper.utils;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.NotEmpty;
-
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 
 /**
  * @author koushik
  */
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
-public class RabbitBroker {
+public class SerDe {
 
-    @NotEmpty
-    @NotNull
-    private String host;
+    private static ObjectMapper mapper;
 
-    @Min(0)
-    @Max(65535)
-    private int port;
+    public static void init(ObjectMapper objectMapper) {
+        mapper = objectMapper;
+    }
+
+    public static ObjectMapper mapper() {
+        Preconditions.checkNotNull(mapper, "Please call SerDe.init(mapper) to set mapper");
+        return mapper;
+    }
 
 }

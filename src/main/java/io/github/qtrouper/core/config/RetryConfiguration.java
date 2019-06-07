@@ -13,22 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.qtrouper.core.models;
+package io.github.qtrouper.core.config;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 /**
  * @author koushik
  */
-@Getter
-@Setter
+@Data
+@EqualsAndHashCode
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class QAccessInfo {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class RetryConfiguration {
 
-    private boolean idempotencyCheckRequired;
+    @Builder.Default
+    private boolean enabled = true;
 
-    private int retryCount;
+    private long ttlMs;
+
+    private int maxRetries;
+
+    private int backOffFactor; //multiplicationFactor
 
 }

@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.qtrouper;
+package io.github.qtrouper;
 
-import com.github.qtrouper.core.config.QueueConfiguration;
-import com.github.qtrouper.core.config.RetryConfiguration;
-import com.github.qtrouper.core.config.SidelineConfiguration;
-import com.github.qtrouper.core.models.QAccessInfo;
-import com.github.qtrouper.core.models.QueueContext;
-import com.github.qtrouper.core.rabbit.RabbitConnection;
-import com.github.qtrouper.utils.SerDe;
+import io.github.qtrouper.core.config.QueueConfiguration;
+import io.github.qtrouper.core.config.RetryConfiguration;
+import io.github.qtrouper.core.config.SidelineConfiguration;
+import io.github.qtrouper.core.models.QAccessInfo;
+import io.github.qtrouper.core.models.QueueContext;
+import io.github.qtrouper.core.rabbit.RabbitConnection;
+import io.github.qtrouper.utils.SerDe;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.rabbitmq.client.AMQP;

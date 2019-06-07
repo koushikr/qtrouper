@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.qtrouper.core.healthchecks;
+package io.github.qtrouper.core.healthchecks;
 
 import com.codahale.metrics.health.HealthCheck;
-import com.github.qtrouper.core.rabbit.RabbitConnection;
+import io.github.qtrouper.core.rabbit.RabbitConnection;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 

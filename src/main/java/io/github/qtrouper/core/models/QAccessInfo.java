@@ -13,25 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.qtrouper.utils;
+package io.github.qtrouper.core.models;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Preconditions;
+import lombok.*;
 
 /**
  * @author koushik
  */
-public class SerDe {
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class QAccessInfo {
 
-    private static ObjectMapper mapper;
+    private boolean idempotencyCheckRequired;
 
-    public static void init(ObjectMapper objectMapper) {
-        mapper = objectMapper;
-    }
-
-    public static ObjectMapper mapper() {
-        Preconditions.checkNotNull(mapper, "Please call SerDe.init(mapper) to set mapper");
-        return mapper;
-    }
+    private int retryCount;
 
 }
