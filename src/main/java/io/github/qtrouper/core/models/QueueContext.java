@@ -16,8 +16,8 @@
 package io.github.qtrouper.core.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.github.qtrouper.utils.SerDe;
 import com.google.common.base.Strings;
+import io.github.qtrouper.utils.SerDe;
 import lombok.*;
 
 import java.io.Serializable;

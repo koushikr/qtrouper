@@ -16,9 +16,9 @@
 package io.github.qtrouper.core.healthchecks;
 
 import com.codahale.metrics.health.HealthCheck;
-import io.github.qtrouper.core.rabbit.RabbitConnection;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
+import io.github.qtrouper.core.rabbit.RabbitConnection;
 
 import javax.inject.Singleton;
 import java.io.IOException;

@@ -15,6 +15,12 @@
  */
 package io.github.qtrouper;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.Envelope;
 import io.github.qtrouper.core.config.QueueConfiguration;
 import io.github.qtrouper.core.config.RetryConfiguration;
 import io.github.qtrouper.core.config.SidelineConfiguration;
@@ -22,12 +28,6 @@ import io.github.qtrouper.core.models.QAccessInfo;
 import io.github.qtrouper.core.models.QueueContext;
 import io.github.qtrouper.core.rabbit.RabbitConnection;
 import io.github.qtrouper.utils.SerDe;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.DefaultConsumer;
-import com.rabbitmq.client.Envelope;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ClassUtils;
@@ -76,12 +76,6 @@ public abstract class Trouper<Message extends QueueContext> {
     }
 
 
-    private boolean isExceptionIgnorable(Throwable t) {
-        return droppedExceptionTypes
-                .stream()
-                .anyMatch(exceptionType -> ClassUtils.isAssignable(t.getClass(), exceptionType));
-    }
-
     public abstract boolean process(Message message, QAccessInfo accessInfo);
 
     public abstract boolean processSideline(Message message, QAccessInfo accessInfo);
@@ -90,7 +84,6 @@ public abstract class Trouper<Message extends QueueContext> {
      * Determines if a message is expired. Checks if message expiry is enabled and current time is more than expiry time.
      * @param expiresAtEnabled  {@link Boolean}         Whether message expiry is enabled or not
      * @param expiresAt         {@link Long}            The time at which the messsage is set to expire
-     * @return
      */
     private boolean isMessageExpired(boolean expiresAtEnabled, long expiresAt){
         return expiresAtEnabled && expiresAt != 0 && expiresAt < System.currentTimeMillis();
@@ -109,7 +102,6 @@ public abstract class Trouper<Message extends QueueContext> {
      * @param message           {@link Message}                 The message that is associated with the Trouper
      * @param properties        {@link AMQP.BasicProperties}    The AMQP Basic Properties
      * @return  if the handle is successful or otherwise.
-     * @throws Exception
      */
     private boolean handle(Message message, AMQP.BasicProperties properties) throws Exception {
 
@@ -379,6 +371,12 @@ public abstract class Trouper<Message extends QueueContext> {
             this.trouper = trouper;
             this.sideline = sideline;
             getChannel().basicQos(prefetchCount);
+        }
+
+        private boolean isExceptionIgnorable(Throwable t) {
+            return droppedExceptionTypes
+                    .stream()
+                    .anyMatch(exceptionType -> ClassUtils.isAssignable(t.getClass(), exceptionType));
         }
 
         /**

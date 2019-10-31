@@ -16,6 +16,8 @@
 package io.github.qtrouper;
 
 
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
 import io.github.qtrouper.core.config.QueueConfiguration;
 import io.github.qtrouper.core.config.RetryConfiguration;
 import io.github.qtrouper.core.config.SidelineConfiguration;
@@ -23,8 +25,6 @@ import io.github.qtrouper.core.models.QAccessInfo;
 import io.github.qtrouper.core.models.QueueContext;
 import io.github.qtrouper.core.rabbit.RabbitConfiguration;
 import io.github.qtrouper.core.rabbit.RabbitConnection;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
