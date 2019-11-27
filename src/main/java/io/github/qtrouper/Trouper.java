@@ -380,6 +380,24 @@ public abstract class Trouper<Message extends QueueContext> {
         }
 
         /**
+         * Need to augment the properties with checks and balances for people might push into the queue async, w/o any header
+         * information. Want trouper to gracefully handle such a scenario.
+         *
+         * @param basicProperties           {@link AMQP.BasicProperties}    The properties object sent during the push.
+         */
+        private AMQP.BasicProperties getProperties(AMQP.BasicProperties basicProperties){
+            if(null == basicProperties){
+                return new AMQP.BasicProperties.Builder().contentType("text/plain").deliveryMode(2).headers(new HashMap<>()).build();
+            }
+
+            if(null == basicProperties.getHeaders()){
+                return basicProperties.builder().headers(new HashMap<>()).build();
+            }
+
+            return basicProperties;
+        }
+
+        /**
          * Understands if the consumer is for the mainQueue or the sideline Queue
          * Calls appropriate process methods.
          *
@@ -400,9 +418,11 @@ public abstract class Trouper<Message extends QueueContext> {
             try {
                 final Message message = SerDe.mapper().readValue(body, clazz);
 
+                AMQP.BasicProperties propertyDetails = getProperties(properties);
+
                 final boolean success = sideline ?
-                        trouper.processSideline(message, getAccessInformation(properties)) :
-                        trouper.handle(message, properties);
+                        trouper.processSideline(message, getAccessInformation(propertyDetails)) :
+                        trouper.handle(message, propertyDetails);
 
                 if (success) {
                     getChannel().basicAck(envelope.getDeliveryTag(), false);
