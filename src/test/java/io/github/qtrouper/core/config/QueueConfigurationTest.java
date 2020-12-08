@@ -15,8 +15,9 @@
  */
 package io.github.qtrouper.core.config;
 
-import org.junit.Assert;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class QueueConfigurationTest {
 
@@ -26,9 +27,9 @@ public class QueueConfigurationTest {
 
     QueueConfiguration queueConfiguration = new QueueConfiguration();
 
-    Assert.assertFalse(queueConfiguration.isConsumerDisabled());
-    Assert.assertEquals(queueConfiguration.getConcurrency(), 3);
-    Assert.assertEquals(queueConfiguration.getNamespace(), "qtrouper");
+    Assertions.assertFalse(queueConfiguration.isConsumerDisabled());
+    Assertions.assertEquals(queueConfiguration.getConcurrency(), 3);
+    Assertions.assertEquals(queueConfiguration.getNamespace(), "qtrouper");
 
 
   }
@@ -38,9 +39,9 @@ public class QueueConfigurationTest {
 
     QueueConfiguration queueViaBuilder = QueueConfiguration.builder().build();
 
-    Assert.assertFalse(queueViaBuilder.isConsumerDisabled());
-    Assert.assertEquals(queueViaBuilder.getConcurrency(), 3);
-    Assert.assertEquals(queueViaBuilder.getNamespace(), "qtrouper");
+    Assertions.assertFalse(queueViaBuilder.isConsumerDisabled());
+    Assertions.assertEquals(queueViaBuilder.getConcurrency(), 3);
+    Assertions.assertEquals(queueViaBuilder.getNamespace(), "qtrouper");
 
   }
 
