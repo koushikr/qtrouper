@@ -5,7 +5,7 @@
   <parent>
     <artifactId>qtrouper</artifactId>
     <groupId>io.github.qtrouper</groupId>
-    <version>0.0.2</version>
+    <version>0.0.2-SNAPSHOT</version>
   </parent>
 
   <artifactId>qtrouper-dw</artifactId>
