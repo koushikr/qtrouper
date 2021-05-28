@@ -16,8 +16,20 @@
 package io.github.qtrouper;
 
 
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
+import io.github.qtrouper.core.config.MessageExpiryConfiguration;
+import io.github.qtrouper.core.config.MessageExpiryConfiguration.MessageExpiryAction;
 import io.github.qtrouper.core.config.QueueConfiguration;
 import io.github.qtrouper.core.config.RetryConfiguration;
 import io.github.qtrouper.core.config.SidelineConfiguration;
@@ -25,8 +37,7 @@ import io.github.qtrouper.core.models.QAccessInfo;
 import io.github.qtrouper.core.models.QueueContext;
 import io.github.qtrouper.core.rabbit.RabbitConfiguration;
 import io.github.qtrouper.core.rabbit.RabbitConnection;
-
-import java.io.IOException;
+import io.github.qtrouper.utils.SerDe;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
@@ -34,8 +45,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import static org.mockito.Mockito.*;
+import org.mockito.ArgumentCaptor;
 
 /**
  * @author koushik
@@ -82,7 +92,8 @@ public class TrouperTest {
   }
 
   @BeforeEach
-  public void setup() throws IOException {
+  public void setup() {
+    SerDe.init(new ObjectMapper());
     this.rabbitConnection = mock(RabbitConnection.class);
   }
 
@@ -180,5 +191,63 @@ public class TrouperTest {
     Trouper trouper = getTrouperAfterStart(queueConfiguration);
 
     Assertions.assertEquals(20, trouper.getHandlers().size());
+  }
+
+  @Test
+  public void testPublishWithOutExpiryEnabled() throws Exception {
+
+    QueueConfiguration queueConfiguration = QueueConfiguration.builder()
+        .queueName("queue")
+        .namespace(DEFAULT_NAMESPACE)
+        .concurrency(1)
+        .prefetchCount(1)
+        .consumerDisabled(false)
+        .retry(getRetryConfiguration(false, 1))
+        .sideline(getSidelineConfiguration(true, 1))
+        .build();
+    Trouper trouper = getTrouperAfterStart(queueConfiguration);
+
+    QueueContext queueContext = new QueueContext();
+    trouper.publish(queueContext);
+
+    ArgumentCaptor<BasicProperties> basicPropertiesArgumentCaptor =
+        ArgumentCaptor.forClass(BasicProperties.class);
+
+    verify(channel)
+        .basicPublish(anyString(), anyString(), basicPropertiesArgumentCaptor.capture(), any());
+
+    Assertions.assertEquals(0, basicPropertiesArgumentCaptor.getValue().getHeaders().size());
+  }
+
+  @Test
+  public void testPublishWithExpiryEnabled() throws Exception {
+
+    QueueConfiguration queueConfiguration = QueueConfiguration.builder()
+        .queueName("queue")
+        .namespace(DEFAULT_NAMESPACE)
+        .concurrency(1)
+        .prefetchCount(1)
+        .consumerDisabled(false)
+        .retry(getRetryConfiguration(false, 1))
+        .sideline(getSidelineConfiguration(true, 1))
+        .messageExpiry(MessageExpiryConfiguration.builder()
+            .enabled(true)
+            .action(MessageExpiryAction.IGNORE)
+            .thresholdInMs(1000)
+            .build())
+        .build();
+    Trouper trouper = getTrouperAfterStart(queueConfiguration);
+
+    QueueContext queueContext = new QueueContext();
+    trouper.publish(queueContext);
+
+    ArgumentCaptor<BasicProperties> basicPropertiesArgumentCaptor =
+        ArgumentCaptor.forClass(BasicProperties.class);
+
+    verify(channel)
+        .basicPublish(anyString(), anyString(), basicPropertiesArgumentCaptor.capture(), any());
+
+    Assertions.assertEquals(2, basicPropertiesArgumentCaptor.getValue().getHeaders().size());
+    Assertions.assertEquals(true, basicPropertiesArgumentCaptor.getValue().getHeaders().get("x-expires-enabled"));
   }
 }

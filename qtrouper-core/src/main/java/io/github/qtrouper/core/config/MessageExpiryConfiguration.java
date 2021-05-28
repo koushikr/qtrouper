@@ -36,7 +36,8 @@ public class MessageExpiryConfiguration {
 
   private long thresholdInMs; // If threshold is breached given action will be taken
 
-  private MessageExpiryAction action;
+  @Builder.Default
+  private MessageExpiryAction action = MessageExpiryAction.IGNORE;
 
   public enum MessageExpiryAction {
     SIDELINE,
