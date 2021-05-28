@@ -25,15 +25,15 @@ import io.github.qtrouper.core.models.QAccessInfo;
 import io.github.qtrouper.core.models.QueueContext;
 import io.github.qtrouper.core.rabbit.RabbitConfiguration;
 import io.github.qtrouper.core.rabbit.RabbitConnection;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.mockito.Mockito.*;
 
@@ -81,7 +81,7 @@ public class TrouperTest {
         .build();
   }
 
-  @Before
+  @BeforeEach
   public void setup() throws IOException {
     this.rabbitConnection = mock(RabbitConnection.class);
   }
@@ -162,7 +162,7 @@ public class TrouperTest {
 
     Trouper trouper = getTrouperAfterStart(queueConfiguration);
 
-    Assert.assertTrue(trouper.getHandlers().size() == 1);
+    Assertions.assertEquals(1, trouper.getHandlers().size());
   }
 
   @Test
@@ -179,6 +179,6 @@ public class TrouperTest {
 
     Trouper trouper = getTrouperAfterStart(queueConfiguration);
 
-    Assert.assertTrue(trouper.getHandlers().size() == 20);
+    Assertions.assertEquals(20, trouper.getHandlers().size());
   }
 }
