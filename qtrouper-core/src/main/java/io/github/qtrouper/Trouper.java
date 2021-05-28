@@ -21,6 +21,8 @@ import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
+import io.github.qtrouper.core.config.MessageExpiryConfiguration;
+import io.github.qtrouper.core.config.MessageExpiryConfiguration.MessageExpiryAction;
 import io.github.qtrouper.core.config.QueueConfiguration;
 import io.github.qtrouper.core.config.RetryConfiguration;
 import io.github.qtrouper.core.config.SidelineConfiguration;
@@ -28,6 +30,7 @@ import io.github.qtrouper.core.models.QAccessInfo;
 import io.github.qtrouper.core.models.QueueContext;
 import io.github.qtrouper.core.rabbit.RabbitConnection;
 import io.github.qtrouper.utils.SerDe;
+import java.util.Optional;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ClassUtils;
@@ -92,6 +95,9 @@ public abstract class Trouper<Message extends QueueContext> {
     /**
      * Handle does the following things.
      *
+     * Checks if message is expired:
+     * If expired, checks if need to be sidelined and publishes to sideline else ignored
+     * If ain't expired then follows next
      * Calls the appropriate process method on the consumer.
      * If the process method succeeds, returns true and exits.
      * If otherwise, checks if retry is enabled.
@@ -110,7 +116,8 @@ public abstract class Trouper<Message extends QueueContext> {
         long expiresAt = (Long) properties.getHeaders().getOrDefault(EXPIRES_AT_TIMESTAMP, 0L);
 
         if (isMessageExpired(expiresAtEnabled, expiresAt)){
-            log.info("Ignoring message due to expiry {}", message);
+            log.info("Message expired {}", message);
+            handleExpiredMessage(message);
             return true;
         }
 
@@ -132,14 +139,31 @@ public abstract class Trouper<Message extends QueueContext> {
             retryCount++;
 
             long expiration = (long) properties.getHeaders().getOrDefault(EXPIRATION, retry.getTtlMs());
-            long newExpiration = expiration * retry.getBackOffFactor();
 
-            retryPublishWithExpiry(message, retryCount, newExpiration, expiresAt, expiresAtEnabled);
+            retryPublishWithExpiry(message, retryCount, expiration, expiresAt, expiresAtEnabled);
 
-            return true;
-        }else{
+        } else {
             sidelinePublish(message);
-            return true;
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks message expiry config if set to sideline then publishes to sideline
+     * else will be ignored
+     * @param message           {@link Message}                  The message that needs to be handled for expiry
+     */
+    private void handleExpiredMessage(Message message) throws Exception {
+        MessageExpiryAction action = Optional.ofNullable(config)
+            .map(QueueConfiguration::getMessageExpiry)
+            .map(MessageExpiryConfiguration::getAction)
+            .orElse(MessageExpiryAction.IGNORE);
+
+        if (MessageExpiryAction.SIDELINE.equals(action)) {
+            sidelinePublish(message);
+        } else {
+            log.info("Message is expired :: ignoring :: {}", message);
         }
     }
 
@@ -164,8 +188,42 @@ public abstract class Trouper<Message extends QueueContext> {
         return queueName + "_RETRY";
     }
 
+    /**
+     * Check if any there is any message expiry config for the trouper
+     * If any config exists publishes to the queue adding appropriate headers
+     * If not does a basic publish
+     * @param message           {@link Message}                  The message that needs to be published
+     */
     public final void publish(Message message) throws Exception {
-        publish(message, new AMQP.BasicProperties.Builder().contentType("text/plain").deliveryMode(2).headers(new HashMap<>()).build());
+
+        if (isMessageExpiryEnabled()) {
+            publishWithExpiryFromConfiguration(message);
+        } else {
+            publish(message, new AMQP.BasicProperties.Builder().contentType("text/plain").deliveryMode(2).headers(new HashMap<>()).build());
+        }
+    }
+
+    /**
+     * Publishes adding expiry details
+     * @param message           {@link Message}                  The message that needs to be published
+     */
+    private void publishWithExpiryFromConfiguration(Message message) throws Exception {
+        long expiresAt = System.currentTimeMillis() + Optional.ofNullable(config)
+            .map(QueueConfiguration::getMessageExpiry)
+            .map(MessageExpiryConfiguration::getThresholdInMs)
+            .orElse(0L);
+        boolean expiryEnabled = isMessageExpiryEnabled();
+        publishWithExpiry(message, expiresAt, expiryEnabled);
+    }
+
+    /**
+     * @return returns expiry conf set in the queue config
+     */
+    private boolean isMessageExpiryEnabled() {
+        return Optional.ofNullable(config)
+            .map(QueueConfiguration::getMessageExpiry)
+            .map(MessageExpiryConfiguration::isEnabled)
+            .orElse(false);
     }
 
     /**

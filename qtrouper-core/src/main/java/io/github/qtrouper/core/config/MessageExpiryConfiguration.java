@@ -15,16 +15,14 @@
  */
 package io.github.qtrouper.core.config;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-
-/**
- * @author koushik
- */
 @Data
 @EqualsAndHashCode
 @ToString
@@ -32,36 +30,17 @@ import javax.validation.constraints.Min;
 @NoArgsConstructor
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class QueueConfiguration {
+public class MessageExpiryConfiguration {
 
-    private static final String DEFAULT_NAMESPACE = "qtrouper";
+  private boolean enabled;
 
-    @Builder.Default
-    private String namespace = DEFAULT_NAMESPACE;
+  private long thresholdInMs; // If threshold is breached given action will be taken
 
-    private String queueName;
+  private MessageExpiryAction action;
 
-    @Min(1)
-    @Max(100)
-    @Builder.Default
-    private int concurrency = 3;
-
-    @Min(1)
-    @Max(100)
-    @Builder.Default
-    private int prefetchCount = 1;
-
-    private boolean consumerDisabled;
-
-    private RetryConfiguration retry;
-
-    private SidelineConfiguration sideline;
-
-    private MessageExpiryConfiguration messageExpiry;
-
-    @JsonIgnore
-    public boolean isConsumerEnabled(){
-        return !consumerDisabled;
-    }
+  public enum MessageExpiryAction {
+    SIDELINE,
+    IGNORE;
+  }
 
 }
