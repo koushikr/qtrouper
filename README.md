@@ -17,7 +17,7 @@ Use the following maven dependency:
 ```xml
 <dependency>
     <groupId>io.github.qtrouper</groupId>
-    <artifactId>qtrouper</artifactId>
+    <artifactId>qtrouper-dw</artifactId>
     <version>0.0.1-1</version>
 </dependency>
 ```
@@ -95,7 +95,7 @@ static class SampleConfiguration extends Configuration{
 
 ```
 
-static class QueueingActor extends QTrouper<QueueContext> {
+static class QueueingActor extends ManagedTrouper<QueueContext> {
 
         @Inject
         public SymphonyActor(QueueConfiguration consumerConfiguration, RabbitConnection rabbitConnection) {

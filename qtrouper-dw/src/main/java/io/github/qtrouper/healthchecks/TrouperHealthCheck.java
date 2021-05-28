@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.qtrouper.core.healthchecks;
+package io.github.qtrouper.healthchecks;
 
 import com.codahale.metrics.health.HealthCheck;
 import com.rabbitmq.client.Channel;
@@ -28,27 +28,27 @@ import java.io.IOException;
  */
 @Singleton
 public class TrouperHealthCheck extends HealthCheck{
-    private final RabbitConnection rabbitConnection;
+  private final RabbitConnection rabbitConnection;
 
-    public TrouperHealthCheck(RabbitConnection rabbitConnection) {
-        this.rabbitConnection = rabbitConnection;
-    }
+  public TrouperHealthCheck(RabbitConnection rabbitConnection) {
+    this.rabbitConnection = rabbitConnection;
+  }
 
-    @Override
-    protected Result check() throws Exception {
-        final Connection connection = rabbitConnection.getConnection();
-        Result result;
-        if (connection != null && connection.isOpen()) {
-            try {
-                Channel channel = connection.createChannel();
-                channel.close();
-                result = Result.healthy();
-            } catch (IOException e) {
-                result = Result.unhealthy("Connection is open, could not create channel");
-            }
-        } else {
-            result = Result.unhealthy("Not Connected");
-        }
-        return result;
+  @Override
+  protected Result check() throws Exception {
+    final Connection connection = rabbitConnection.getConnection();
+    Result result;
+    if (connection != null && connection.isOpen()) {
+      try {
+        Channel channel = connection.createChannel();
+        channel.close();
+        result = Result.healthy();
+      } catch (IOException e) {
+        result = Result.unhealthy("Connection is open, could not create channel");
+      }
+    } else {
+      result = Result.unhealthy("Not Connected");
     }
+    return result;
+  }
 }

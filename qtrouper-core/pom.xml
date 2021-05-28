@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+  xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <artifactId>qtrouper</artifactId>
+    <groupId>io.github.qtrouper</groupId>
+    <version>0.0.2-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>qtrouper-core</artifactId>
+  <packaging>jar</packaging>
+  <version>0.0.2</version>
+  <name>qtrouper-core</name>
+
+  <properties>
+    <amqp.version>4.8.0</amqp.version>
+    <jackson.core.version>2.10.3</jackson.core.version>
+    <apache.commons.lang3.version>3.10</apache.commons.lang3.version>
+    <javax.inject.version>1</javax.inject.version>
+    <hibernate.validator.version>5.4.3.Final</hibernate.validator.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.rabbitmq</groupId>
+      <artifactId>amqp-client</artifactId>
+      <version>${amqp.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.core.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${apache.commons.lang3.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.inject</groupId>
+      <artifactId>javax.inject</artifactId>
+      <version>${javax.inject.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-validator</artifactId>
+      <version>${hibernate.validator.version}</version>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
+</project>
