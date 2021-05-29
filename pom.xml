@@ -41,6 +41,7 @@
   <modules>
     <module>qtrouper-core</module>
     <module>qtrouper-dw</module>
+    <module>qtrouper-dw-example</module>
   </modules>
 
   <properties>
