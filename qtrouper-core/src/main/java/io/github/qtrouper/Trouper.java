@@ -190,20 +190,20 @@ public abstract class Trouper<Message extends QueueContext> {
     }
 
     private void publish(Message message, AMQP.BasicProperties properties) throws Exception {
-        log.debug("Publishing to {}: {}", queueName, message);
+        log.info("Publishing to {}: {}", queueName, message);
 
         publishChannel.basicPublish(this.config.getNamespace(), queueName, properties, SerDe.mapper().writeValueAsBytes(message));
 
-        log.debug("Published to {}: {}", queueName, message);
+        log.info("Published to {}: {}", queueName, message);
 
     }
 
     public void sidelinePublish(Message message) throws Exception {
-        log.debug("Publishing to {}: {}", getSidelineQueue(), message);
+        log.info("Publishing to {}: {}", getSidelineQueue(), message);
 
         publishChannel.basicPublish(this.config.getNamespace(), getSidelineQueue(),  new AMQP.BasicProperties.Builder().contentType("text/plain").deliveryMode(2).headers(new HashMap<>()).build(), SerDe.mapper().writeValueAsBytes(message));
 
-        log.debug("Published to {}: {}", getSidelineQueue(), message);
+        log.info("Published to {}: {}", getSidelineQueue(), message);
     }
 
     /**
@@ -258,7 +258,7 @@ public abstract class Trouper<Message extends QueueContext> {
     private void retryPublish(Message message, AMQP.BasicProperties properties)
         throws Exception {
 
-      log.debug("Publishing to {}: {}", getRetryQueue(), message);
+      log.info("Publishing to {}: {}", getRetryQueue(), message);
 
       connection.getChannel().basicPublish(
           getRetryExchange(),
@@ -266,7 +266,7 @@ public abstract class Trouper<Message extends QueueContext> {
           properties, SerDe.mapper().writeValueAsBytes(message)
       );
 
-      log.debug("Published to {}: {}", getRetryQueue(), message);
+      log.info("Published to {}: {}", getRetryQueue(), message);
     }
 
     private void ensureExchange(String exchange) throws IOException {
