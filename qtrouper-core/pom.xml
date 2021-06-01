@@ -12,7 +12,7 @@
 
   <artifactId>qtrouper-core</artifactId>
   <packaging>jar</packaging>
-  <version>0.0.2</version>
+  <version>0.0.2-SNAPSHOT</version>
   <name>qtrouper-core</name>
 
   <properties>

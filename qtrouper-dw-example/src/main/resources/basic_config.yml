@@ -1,0 +1,38 @@
+rabbitConfiguration:
+  brokers:
+    - host: localhost
+      port: 5671
+    - host: localhost
+      port: 5671
+    - host: localhost
+      port: 5671
+  userName: admin
+  password: admin
+  threadPoolSize: 32
+  sslEnabled: true
+
+queues:
+  - queueName: NOTIFICATION_SENDER
+    consumerDisabled: false
+    namespace: basic.application
+    concurrency: 3
+    prefetchCount: 1
+    retry:
+      enabled: true
+      ttlMs: 50000
+      maxRetries: 3
+    sideline:
+      enabled: true
+      concurrency: 1
+  - queueName: ACKNOWLEDGER
+    consumerDisabled: false
+    namespace: basic.application
+    concurrency: 3
+    prefetchCount: 1
+    retry:
+      enabled: true
+      ttlMs: 50000
+      maxRetries: 3
+    sideline:
+      enabled: true
+      concurrency: 1
