@@ -1,4 +1,4 @@
-### Version 0.0.1-2
+### Version 0.0.1-1
 
 - Added default handling to QTrouper.handle in case the properties object goes missing or when the headers are not present.
 - Doing a minor, for this is a bug fix. 
