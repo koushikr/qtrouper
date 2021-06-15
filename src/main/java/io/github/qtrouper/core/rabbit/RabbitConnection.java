@@ -15,19 +15,20 @@
  */
 package io.github.qtrouper.core.rabbit;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.rabbitmq.client.Address;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
-
-import javax.inject.Singleton;
+import com.rabbitmq.client.impl.StandardMetricsCollector;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.Executors;
+import javax.inject.Singleton;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author koushik
@@ -40,9 +41,12 @@ public class RabbitConnection {
     private final RabbitConfiguration config;
     private Connection connection;
     private Channel channel;
+    private MetricRegistry metricRegistry;
 
-    public RabbitConnection(RabbitConfiguration rabbitConfiguration) {
+    public RabbitConnection(RabbitConfiguration rabbitConfiguration,
+                            MetricRegistry metricRegistry) {
         this.config = rabbitConfiguration;
+        this.metricRegistry = metricRegistry;
     }
 
     /**
@@ -64,6 +68,9 @@ public class RabbitConnection {
            factory.useSslProtocol();
         }
 
+        if (config.isMetricsEnabled()) {
+            factory.setMetricsCollector(new StandardMetricsCollector(metricRegistry, config.getClusterName()));
+        }
         factory.setAutomaticRecoveryEnabled(true);
         factory.setTopologyRecoveryEnabled(true);
         factory.setNetworkRecoveryInterval(3000);

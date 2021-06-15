@@ -16,14 +16,13 @@
 package io.github.qtrouper.core.rabbit;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.List;
+import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.NotEmpty;
-
-import javax.validation.constraints.NotNull;
-import java.util.List;
 
 /**
  * @author koushik
@@ -34,6 +33,8 @@ import java.util.List;
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RabbitConfiguration {
+
+    private String clusterName;
 
     @NotNull
     @NotEmpty
@@ -53,4 +54,7 @@ public class RabbitConfiguration {
     private String virtualHost;
 
     private boolean sslEnabled;
+
+    private boolean metricsEnabled;
+
 }

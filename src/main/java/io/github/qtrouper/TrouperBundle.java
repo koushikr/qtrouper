@@ -57,7 +57,7 @@ public abstract class TrouperBundle<T extends Configuration> implements Configur
 
         SerDe.init(environment.getObjectMapper());
 
-        rabbitConnection = new RabbitConnection(getRabbitConfiguration(configuration));
+        rabbitConnection = new RabbitConnection(getRabbitConfiguration(configuration), environment.metrics());
 
         environment.lifecycle().manage(new Managed() {
             @Override
