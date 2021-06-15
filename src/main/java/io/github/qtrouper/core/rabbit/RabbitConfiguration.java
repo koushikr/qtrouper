@@ -34,8 +34,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RabbitConfiguration {
 
-    private String clusterName;
-
     @NotNull
     @NotEmpty
     private List<RabbitBroker> brokers;

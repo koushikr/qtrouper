@@ -69,7 +69,7 @@ public class RabbitConnection {
         }
 
         if (config.isMetricsEnabled()) {
-            factory.setMetricsCollector(new StandardMetricsCollector(metricRegistry, config.getClusterName()));
+            factory.setMetricsCollector(new StandardMetricsCollector(metricRegistry));
         }
         factory.setAutomaticRecoveryEnabled(true);
         factory.setTopologyRecoveryEnabled(true);
