@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.qtrouper</groupId>
     <artifactId>qtrouper</artifactId>
-    <version>0.0.1-1</version>
+    <version>0.0.2</version>
     <packaging>jar</packaging>
 
     <licenses>
@@ -28,6 +28,11 @@
             <id>koushikr</id>
             <name>Koushik Ramachandra</name>
             <email>rkoushik.14@gmail.com</email>
+        </developer>
+        <developer>
+            <id>chaitanyachavali</id>
+            <name>Chaitanya Reddy</name>
+            <email>chaitanyachavali7@gmail.com</email>
         </developer>
     </developers>
 

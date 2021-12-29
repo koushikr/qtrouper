@@ -114,7 +114,14 @@ public abstract class Trouper<Message extends QueueContext> {
             return true;
         }
 
-        boolean processed = process(message, getAccessInformation(properties));
+        boolean processed;
+
+        try {
+            processed = process(message, getAccessInformation(properties));
+        } catch (Exception ex) {
+            log.error("Exception while processing the message {}", message, ex);
+            processed = false;
+        }
 
         if (processed) return true;
 
