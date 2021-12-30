@@ -131,7 +131,7 @@ public abstract class Trouper<Message extends QueueContext> {
 
             int retryCount = (int) properties.getHeaders().getOrDefault(RETRY_COUNT, 0);
 
-            if (retryCount > retry.getMaxRetries()) {
+            if (retryCount >= retry.getMaxRetries()) {
                 sidelinePublish(message);
                 return true;
             }

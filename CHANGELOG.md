@@ -1,6 +1,7 @@
 ### Version 0.0.2
 
-- Added exception handling in `Trouper.handle` for exceptions thrown from `Trouper.process`  
+- Added exception handling in `Trouper.handle` for exceptions thrown from `Trouper.process`.
+- Fix number of retries which is making one extra retry always if enabled.
 
 ### Version 0.0.1-1
 

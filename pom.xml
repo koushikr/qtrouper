@@ -45,6 +45,7 @@
         <mockito.version>2.9.0</mockito.version>
         <cglib.version>3.2.5</cglib.version>
         <amqp.version>4.8.0</amqp.version>
+        <testcontainer.rabbitmq.version>1.16.2</testcontainer.rabbitmq.version>
 
         <!--Jacoco properties-->
         <jacoco.version>0.8.0</jacoco.version>
@@ -105,6 +106,15 @@
             <artifactId>amqp-client</artifactId>
             <version>${amqp.version}</version>
         </dependency>
+
+        <!-- Test Dependencies -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>rabbitmq</artifactId>
+            <version>${testcontainer.rabbitmq.version}</version>
+            <scope>test</scope>
+        </dependency>
+
 
     </dependencies>
 
