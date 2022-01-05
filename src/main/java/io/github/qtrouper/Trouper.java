@@ -308,7 +308,7 @@ public abstract class Trouper<C extends QueueContext> {
         });
     }
 
-    private class Handler extends DefaultConsumer {
+    public class Handler extends DefaultConsumer {
 
         private final Class<? extends C> clazz;
         private final Trouper<C> trouper;
