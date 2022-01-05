@@ -25,6 +25,7 @@ import io.github.qtrouper.core.models.QAccessInfo;
 import io.github.qtrouper.core.models.QueueContext;
 import io.github.qtrouper.core.rabbit.RabbitConfiguration;
 import io.github.qtrouper.core.rabbit.RabbitConnection;
+import lombok.val;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,9 +41,10 @@ import static org.mockito.Mockito.*;
 /**
  * @author koushik
  */
+@SuppressWarnings({"unchecked", "unused"})
 public class TrouperTest {
 
-    class TestTrouper extends Trouper<QueueContext>{
+    static class TestTrouper extends Trouper<QueueContext>{
 
         protected TestTrouper(String queueName, QueueConfiguration config, RabbitConnection connection, Class<? extends QueueContext> clazz, Set<Class<?>> droppedExceptionTypes) {
             super(queueName, config, connection, clazz, droppedExceptionTypes);
@@ -59,8 +61,8 @@ public class TrouperTest {
         }
     }
 
-    private Connection connection = mock(Connection.class);
-    private Channel channel = mock(Channel.class);
+    private final Connection connection = mock(Connection.class);
+    private final Channel channel = mock(Channel.class);
 
     private static final String DEFAULT_NAMESPACE = "default";
 
@@ -82,58 +84,50 @@ public class TrouperTest {
     }
 
     @Before
-    public void setup() throws IOException {
+    public void setup() {
         this.rabbitConnection = mock(RabbitConnection.class);
     }
 
     private TestTrouper getTrouperAfterStart(QueueConfiguration queueConfiguration) throws Exception {
-        Map<String, Object> rmqOpts = mock(Map.class);
-        RabbitConfiguration rabbitConfiguration = RabbitConfiguration.builder()
+        val rmqOpts = mock(Map.class);
+        val rabbitConfiguration = RabbitConfiguration.builder()
                 .brokers(new ArrayList<>())
                 .password("")
                 .userName("")
                 .virtualHost("/")
                 .threadPoolSize(100)
                 .build();
-
         when(rabbitConnection.getConfig()).thenReturn(rabbitConfiguration);
         when(rabbitConnection.rmqOpts()).thenReturn(rmqOpts);
         when(rabbitConnection.newChannel()).thenReturn(channel);
         when(rabbitConnection.getConnection()).thenReturn(connection);
         when(rabbitConnection.channel()).thenReturn(channel);
-
-
-        TestTrouper testTrouper = new TestTrouper(queueConfiguration.getQueueName(), queueConfiguration,
+        val testTrouper = new TestTrouper(queueConfiguration.getQueueName(), queueConfiguration,
                 rabbitConnection, QueueContext.class, new HashSet<>());
-
         testTrouper.start();
-
-
         verify(channel, times(2)).exchangeDeclare(
                 anyString(), anyString(), anyBoolean(), anyBoolean(), any()
         );
-
         verify(rabbitConnection, times(3)).ensure(anyString(), anyString(), any(Map.class));
-
         return testTrouper;
     }
 
     @Test
     public void trouperStartTestWithNoConsumers() throws Exception {
-        QueueConfiguration queueConfiguration = QueueConfiguration.builder()
+        val queueConfiguration = QueueConfiguration.builder()
                 .queueName("queue")
                 .namespace(DEFAULT_NAMESPACE)
                 .concurrency(0)
                 .prefetchCount(10)
                 .consumerDisabled(true)
                 .build();
-
-        getTrouperAfterStart(queueConfiguration);
+        val trouper = getTrouperAfterStart(queueConfiguration);
+        trouper.stop();
     }
 
     @Test
     public void trouperStartTestWithNoRetryAndSideline() throws Exception {
-        QueueConfiguration queueConfiguration = QueueConfiguration.builder()
+        val queueConfiguration = QueueConfiguration.builder()
                 .queueName("queue")
                 .namespace(DEFAULT_NAMESPACE)
                 .concurrency(0)
@@ -142,13 +136,13 @@ public class TrouperTest {
                 .retry(getRetryConfiguration(false, 10))
                 .sideline(getSidelineConfiguration(false, 0))
                 .build();
-
-        getTrouperAfterStart(queueConfiguration);
+        val trouper = getTrouperAfterStart(queueConfiguration);
+        trouper.stop();
     }
 
     @Test
     public void trouperStartTestWithOnlySideline() throws Exception {
-        QueueConfiguration queueConfiguration = QueueConfiguration.builder()
+        val queueConfiguration = QueueConfiguration.builder()
                 .queueName("queue")
                 .namespace(DEFAULT_NAMESPACE)
                 .concurrency(0)
@@ -157,17 +151,15 @@ public class TrouperTest {
                 .retry(getRetryConfiguration(false, 10))
                 .sideline(getSidelineConfiguration(true, 1))
                 .build();
-
         when(channel.basicConsume(anyString(), anyBoolean(), any())).thenReturn("tag");
-
-        Trouper trouper = getTrouperAfterStart(queueConfiguration);
-
-        Assert.assertTrue(trouper.getHandlers().size() == 1);
+        val trouper = getTrouperAfterStart(queueConfiguration);
+        Assert.assertEquals(1, trouper.getHandlers().size());
+        trouper.stop();
     }
 
     @Test
     public void trouperStartWithAllEncompassingConfig() throws Exception {
-        QueueConfiguration queueConfiguration = QueueConfiguration.builder()
+        val queueConfiguration = QueueConfiguration.builder()
                 .queueName("queue")
                 .namespace(DEFAULT_NAMESPACE)
                 .concurrency(10)
@@ -176,9 +168,8 @@ public class TrouperTest {
                 .retry(getRetryConfiguration(false, 10))
                 .sideline(getSidelineConfiguration(true, 10))
                 .build();
-
-        Trouper trouper = getTrouperAfterStart(queueConfiguration);
-
-        Assert.assertTrue(trouper.getHandlers().size() == 20);
+        val trouper = getTrouperAfterStart(queueConfiguration);
+        Assert.assertEquals(20, trouper.getHandlers().size());
+        trouper.stop();
     }
 }

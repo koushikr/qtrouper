@@ -13,31 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.qtrouper.core.rabbit;
+package io.github.qtrouper.core.exceptions;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.NotEmpty;
+import lombok.experimental.UtilityClass;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+@UtilityClass
+public class TrouperExceptions {
 
-/**
- * @author koushik
- */
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
-public class RabbitBroker {
-    @NotEmpty
-    @NotNull
-    private String host;
-    @Min(0)
-    @Max(65535)
-    private int port;
-
+    public static void illegalArgument(String message) {
+        throw new IllegalArgumentException(message);
+    }
 }

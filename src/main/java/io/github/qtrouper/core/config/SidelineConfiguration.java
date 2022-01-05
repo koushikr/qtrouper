@@ -21,17 +21,15 @@ import lombok.*;
 /**
  * @author koushik
  */
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
+@EqualsAndHashCode
 public class SidelineConfiguration {
-
     @Builder.Default
     private boolean enabled = true;
-
     private int concurrency;
 
 }

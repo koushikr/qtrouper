@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.qtrouper</groupId>
     <artifactId>qtrouper</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <licenses>
@@ -39,14 +39,14 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dropwizard.version>1.2.2</dropwizard.version>
-        <lombok.version>1.18.6</lombok.version>
+        <lombok.version>1.18.22</lombok.version>
         <guava.version>23.0</guava.version>
-        <junit.version>4.13.1</junit.version>
-        <mockito.version>2.9.0</mockito.version>
+        <junit.version>4.13.2</junit.version>
+        <mockito.version>4.2.0</mockito.version>
         <cglib.version>3.2.5</cglib.version>
-        <amqp.version>4.8.0</amqp.version>
+        <amqp.version>5.14.0</amqp.version>
         <testcontainer.rabbitmq.version>1.16.2</testcontainer.rabbitmq.version>
-
+        <reflections.version>0.10.2</reflections.version>
         <!--Jacoco properties-->
         <jacoco.version>0.8.0</jacoco.version>
         <jacoco.reportPath>${project.basedir}/../target/jacoco.exec</jacoco.reportPath>
@@ -97,7 +97,7 @@
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
-            <version>0.9.11</version>
+            <version>${reflections.version}</version>
         </dependency>
 
         <!-- RabbitMQ -->
@@ -105,14 +105,6 @@
             <groupId>com.rabbitmq</groupId>
             <artifactId>amqp-client</artifactId>
             <version>${amqp.version}</version>
-        </dependency>
-
-        <!-- Test Dependencies -->
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>rabbitmq</artifactId>
-            <version>${testcontainer.rabbitmq.version}</version>
-            <scope>test</scope>
         </dependency>
 
 

@@ -44,7 +44,6 @@ public abstract class TrouperBundle<T extends Configuration> implements Configur
      * Sets the objectMapper properties and initializes RabbitConnection, along with its health check
      * @param configuration     {@link T}               The typed configuration against which the said TrouperBundle is initialized
      * @param environment       {@link Environment}     The dropwizard environment object.
-     * @throws Exception
      */
     @Override
     public void run(T configuration, Environment environment){
@@ -54,19 +53,16 @@ public abstract class TrouperBundle<T extends Configuration> implements Configur
         environment.getObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         environment.getObjectMapper().configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
         environment.getObjectMapper().configure(DeserializationFeature.READ_ENUMS_USING_TO_STRING, true);
-
         SerDe.init(environment.getObjectMapper());
-
-        rabbitConnection = new RabbitConnection(getRabbitConfiguration(configuration));
-
+        rabbitConnection = new RabbitConnection(getRabbitConfiguration(configuration), environment.metrics());
         environment.lifecycle().manage(new Managed() {
             @Override
-            public void start() throws Exception {
+            public void start() {
                 rabbitConnection.start();
             }
 
             @Override
-            public void stop() throws Exception {
+            public void stop() {
                 rabbitConnection.stop();
             }
         });

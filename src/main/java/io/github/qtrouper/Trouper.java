@@ -22,8 +22,6 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 import io.github.qtrouper.core.config.QueueConfiguration;
-import io.github.qtrouper.core.config.RetryConfiguration;
-import io.github.qtrouper.core.config.SidelineConfiguration;
 import io.github.qtrouper.core.models.QAccessInfo;
 import io.github.qtrouper.core.models.QueueContext;
 import io.github.qtrouper.core.rabbit.RabbitConnection;
@@ -37,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 /**
  * @author koushik
@@ -45,27 +44,29 @@ import java.util.Set;
 @EqualsAndHashCode
 @ToString
 @Slf4j
-public abstract class Trouper<Message extends QueueContext> {
+@SuppressWarnings("unused")
+public abstract class Trouper<C extends QueueContext> {
 
     private static final String RETRY_COUNT = "x-retry-count";
     private static final String EXPIRATION = "x-message-ttl";
     private static final String EXPIRES_AT_TIMESTAMP = "x-expires-timestamp";
     private static final String EXPIRES_AT_ENABLED = "x-expires-enabled";
+    private static final String CONTENT_TYPE = "text/plain";
 
     private final QueueConfiguration config;
     private final RabbitConnection connection;
-    private final Class<? extends Message> clazz;
+    private final Class<? extends C> clazz;
     private final Set<Class<?>> droppedExceptionTypes;
     private final int prefetchCount;
     private final String queueName;
     private Channel publishChannel;
     private List<Handler> handlers = Lists.newArrayList();
 
-    public Trouper(
+    protected Trouper(
             String queueName,
             QueueConfiguration config,
             RabbitConnection connection,
-            Class<? extends Message> clazz,
+            Class<? extends C> clazz,
             Set<Class<?>> droppedExceptionTypes) {
         this.config = config;
         this.connection = connection;
@@ -76,11 +77,11 @@ public abstract class Trouper<Message extends QueueContext> {
     }
 
 
-    public abstract boolean process(Message message, QAccessInfo accessInfo);
+    public abstract boolean process(C queueContext, QAccessInfo accessInfo);
 
-    public abstract boolean processSideline(Message message, QAccessInfo accessInfo);
+    public abstract boolean processSideline(C queueContext, QAccessInfo accessInfo);
 
-    /**
+    /*
      * Determines if a message is expired. Checks if message expiry is enabled and current time is more than expiry time.
      * @param expiresAtEnabled  {@link Boolean}         Whether message expiry is enabled or not
      * @param expiresAt         {@link Long}            The time at which the messsage is set to expire
@@ -89,7 +90,7 @@ public abstract class Trouper<Message extends QueueContext> {
         return expiresAtEnabled && expiresAt != 0 && expiresAt < System.currentTimeMillis();
     }
 
-    /**
+    /*
      * Handle does the following things.
      *
      * Calls the appropriate process method on the consumer.
@@ -99,60 +100,46 @@ public abstract class Trouper<Message extends QueueContext> {
      * If retry is enabled, checks the current count for retry.
      * If retryCount is greater than maxRetries, publishes to sideline and exits
      * If otherwise, increments the retryCount and publishes into retryQueue : which would further deadLetter into mainQueue after ttl.
-     * @param message           {@link Message}                 The message that is associated with the Trouper
+     * @param queueContext      {@link C}                 The queueContext that is associated with the Trouper
      * @param properties        {@link AMQP.BasicProperties}    The AMQP Basic Properties
      * @return  if the handle is successful or otherwise.
      */
-    private boolean handle(Message message, AMQP.BasicProperties properties) throws Exception {
-
-        boolean expiresAtEnabled = (Boolean) properties.getHeaders().getOrDefault(EXPIRES_AT_ENABLED, false);
-
-        long expiresAt = (Long) properties.getHeaders().getOrDefault(EXPIRES_AT_TIMESTAMP, 0L);
+    @SneakyThrows
+    private boolean handle(C queueContext, AMQP.BasicProperties properties) {
+        val expiresAtEnabled = (Boolean) properties.getHeaders().getOrDefault(EXPIRES_AT_ENABLED, false);
+        val expiresAt = (Long) properties.getHeaders().getOrDefault(EXPIRES_AT_TIMESTAMP, 0L);
 
         if (isMessageExpired(expiresAtEnabled, expiresAt)){
-            log.info("Ignoring message due to expiry {}", message);
+            log.info("Ignoring queueContext due to expiry {}", queueContext);
             return true;
         }
-
-        boolean processed;
 
         try {
-            processed = process(message, getAccessInformation(properties));
+            val processed = process(queueContext, getAccessInformation(properties));
+            if(processed) return true;
         } catch (Exception ex) {
-            log.error("Exception while processing the message {}", message, ex);
-            processed = false;
+            log.error("Exception while processing the queueContext {}", queueContext, ex);
         }
 
-        if (processed) return true;
-
-        RetryConfiguration retry = config.getRetry();
-
+        val retry = config.getRetry();
         if (retry.isEnabled()) {
-
-            int retryCount = (int) properties.getHeaders().getOrDefault(RETRY_COUNT, 0);
-
+            var retryCount = (int) properties.getHeaders().getOrDefault(RETRY_COUNT, 0);
             if (retryCount >= retry.getMaxRetries()) {
-                sidelinePublish(message);
+                sidelinePublish(queueContext);
                 return true;
             }
-
             retryCount++;
-
-            long expiration = (long) properties.getHeaders().getOrDefault(EXPIRATION, retry.getTtlMs());
-            long newExpiration = expiration * retry.getBackOffFactor();
-
-            retryPublishWithExpiry(message, retryCount, newExpiration, expiresAt, expiresAtEnabled);
-
-            return true;
+            val expiration = (long) properties.getHeaders().getOrDefault(EXPIRATION, retry.getTtlMs());
+            val newExpiration = expiration * retry.getBackOffFactor();
+            retryPublishWithExpiry(queueContext, retryCount, newExpiration, expiresAt, expiresAtEnabled);
         }else{
-            sidelinePublish(message);
-            return true;
+            sidelinePublish(queueContext);
         }
+        return true;
     }
 
     private QAccessInfo getAccessInformation(AMQP.BasicProperties properties) {
-        int retryCount = (int) properties.getHeaders().getOrDefault(RETRY_COUNT, 0);
-
+        val retryCount = (int) properties.getHeaders().getOrDefault(RETRY_COUNT, 0);
         return QAccessInfo.builder()
                 .retryCount(retryCount)
                 .idempotencyCheckRequired(retryCount > 0)
@@ -171,112 +158,90 @@ public abstract class Trouper<Message extends QueueContext> {
         return queueName + "_RETRY";
     }
 
-    public final void publish(Message message) throws Exception {
-        publish(message, new AMQP.BasicProperties.Builder().contentType("text/plain").deliveryMode(2).headers(new HashMap<>()).build());
+    public final void publish(C c) {
+        publish(c, new AMQP.BasicProperties.Builder().contentType(CONTENT_TYPE).deliveryMode(2).headers(new HashMap<>()).build());
     }
 
     /**
      * Publish messages which gets expired at given timestamp if expiration is enabled
      *
-     * @param message           {@link Message}             The message which gets published
-     * @param expiresAt         {@link Long}                The timestamp at which a message gets expired if expiration is enabled
-     * @param expiresAtEnabled  {@link Boolean}             A flag to determine if message expiration is enabled or not
+     * @param queueContext           {@link C}             The queueContext which gets published
+     * @param expiresAt         {@link Long}                The timestamp at which a queueContext gets expired if expiration is enabled
+     * @param expiresAtEnabled  {@link Boolean}             A flag to determine if queueContext expiration is enabled or not
      */
-    public final void publishWithExpiry(Message message, long expiresAt, boolean expiresAtEnabled) throws Exception {
-      Map<String, Object> headers = new HashMap<String, Object>() {
-        {
-          put(EXPIRES_AT_TIMESTAMP, expiresAt);
-          put(EXPIRES_AT_ENABLED, expiresAtEnabled);
-        }
-      };
-      publish(message, headers);
+    public final void publishWithExpiry(C queueContext, long expiresAt, boolean expiresAtEnabled) {
+      publish(queueContext, ImmutableMap.of(EXPIRES_AT_TIMESTAMP, expiresAt, EXPIRES_AT_ENABLED, expiresAtEnabled));
     }
 
-    public final void publish(Message message, Map<String, Object> headers) throws Exception {
-        publish(message, new AMQP.BasicProperties.Builder().contentType("text/plain").deliveryMode(2).headers(headers).build());
+    public final void publish(C queueContext, Map<String, Object> headers) {
+        publish(queueContext, new AMQP.BasicProperties.Builder().contentType(CONTENT_TYPE).deliveryMode(2).headers(headers).build());
     }
 
-    private void publish(Message message, AMQP.BasicProperties properties) throws Exception {
-        log.info("Publishing to {}: {}", queueName, message);
-
-        publishChannel.basicPublish(this.config.getNamespace(), queueName, properties, SerDe.mapper().writeValueAsBytes(message));
-
-        log.info("Published to {}: {}", queueName, message);
-
+    @SneakyThrows
+    private void publish(C queueContext, AMQP.BasicProperties properties) {
+        log.info("Publishing to queue {}: with context {}", queueName, queueContext);
+        publishChannel.basicPublish(this.config.getNamespace(), queueName, properties, SerDe.mapper().writeValueAsBytes(queueContext));
+        log.info("Published to queue {}: with context {}", queueName, queueContext);
     }
 
-    public void sidelinePublish(Message message) throws Exception {
-        log.info("Publishing to {}: {}", getSidelineQueue(), message);
-
-        publishChannel.basicPublish(this.config.getNamespace(), getSidelineQueue(),  new AMQP.BasicProperties.Builder().contentType("text/plain").deliveryMode(2).headers(new HashMap<>()).build(), SerDe.mapper().writeValueAsBytes(message));
-
-        log.info("Published to {}: {}", getSidelineQueue(), message);
+    @SneakyThrows
+    public void sidelinePublish(C queueContext) {
+        log.info("Publishing to {}: {}", getSidelineQueue(), queueContext);
+        publishChannel.basicPublish(this.config.getNamespace(), getSidelineQueue(),  new AMQP.BasicProperties.Builder().contentType(CONTENT_TYPE).deliveryMode(2).headers(ImmutableMap.of()).build(), SerDe.mapper().writeValueAsBytes(queueContext));
+        log.info("Published to {}: {}", getSidelineQueue(), queueContext);
     }
 
     /**
      * Sets the retryCount and expiration and publishes into the retry queue
      * which would further deadLetter into the mainQueue.
-     * @param message           {@link Message}     The message that is associated with the Trouper
-     * @param retryCount        {@link Integer}     The currentRetryCount of the message
+     * @param queueContext           {@link C}     The queueContext that is associated with the Trouper
+     * @param retryCount        {@link Integer}     The currentRetryCount of the queueContext
      * @param expiration        {@link Long}        The current expiration in milliseconds
-     * @throws Exception
      */
-    public final void retryPublish(Message message, int retryCount, long expiration) throws Exception {
-        Map<String, Object> headers = new HashMap<String, Object>() {
-            {
-                put(RETRY_COUNT, retryCount);
-                put(EXPIRATION, expiration);
-            }
-        };
-
-        AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder().contentType("text/plain").expiration(String.valueOf(expiration)).deliveryMode(2).headers(headers).build();
-
-        retryPublish(message, properties);
+    public final void retryPublish(C queueContext, int retryCount, long expiration){
+        val properties = new AMQP.BasicProperties.Builder()
+                .contentType(CONTENT_TYPE)
+                .expiration(String.valueOf(expiration))
+                .deliveryMode(2)
+                .headers(ImmutableMap.of(RETRY_COUNT, retryCount, EXPIRATION, expiration))
+                .build();
+        retryPublish(queueContext, properties);
     }
 
     /**
      * Sets the retryCount, expiration, expiryTimestamp and publishes into the retry queue which would further
      * deadLetter into the mainQueue.
      *
-     * @param message {@link Message}     The message that is associated with the Trouper
-     * @param retryCount {@link Integer}     The currentRetryCount of the message
+     * @param queueContext {@link C}     The c that is associated with the Trouper
+     * @param retryCount {@link Integer}     The currentRetryCount of the c
      * @param expiration {@link Long}        The current expiration in milliseconds
-     * @param expiresAt {@link Long}        The timestamp at which the message should expire
-     * @param expiresAtEnabled {@link Boolean}     Flag to determine whether the message should expire at expiresAt timestamp
+     * @param expiresAt {@link Long}        The timestamp at which the c should expire
+     * @param expiresAtEnabled {@link Boolean}     Flag to determine whether the c should expire at expiresAt timestamp
      */
-    public final void retryPublishWithExpiry(Message message, int retryCount, long expiration,
-        long expiresAt, boolean expiresAtEnabled)
-        throws Exception {
-      Map<String, Object> headers = new HashMap<String, Object>() {
-        {
-          put(RETRY_COUNT, retryCount);
-          put(EXPIRATION, expiration);
-          put(EXPIRES_AT_ENABLED, expiresAtEnabled);
-          put(EXPIRES_AT_TIMESTAMP, expiresAt);
-        }
-      };
-
-      AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder().contentType("text/plain")
-          .expiration(String.valueOf(expiration)).deliveryMode(2).headers(headers).build();
-
-      retryPublish(message, properties);
+    public final void retryPublishWithExpiry(C queueContext, int retryCount, long expiration,
+                                             long expiresAt, boolean expiresAtEnabled) {
+      val properties = new AMQP.BasicProperties.Builder()
+              .contentType(CONTENT_TYPE)
+              .expiration(String.valueOf(expiration))
+              .deliveryMode(2)
+              .headers(ImmutableMap.of(RETRY_COUNT, retryCount, EXPIRATION, expiration, EXPIRES_AT_ENABLED, expiresAtEnabled, EXPIRES_AT_TIMESTAMP, expiresAt))
+              .build();
+      retryPublish(queueContext, properties);
     }
 
-    private void retryPublish(Message message, AMQP.BasicProperties properties)
-        throws Exception {
-
-      log.info("Publishing to {}: {}", getRetryQueue(), message);
-
+    @SneakyThrows
+    private void retryPublish(C queueContext, AMQP.BasicProperties properties) {
+      log.info("Publishing to {}: {}", getRetryQueue(), queueContext);
       connection.getChannel().basicPublish(
           getRetryExchange(),
           getRetryQueue(),
-          properties, SerDe.mapper().writeValueAsBytes(message)
+          properties, SerDe.mapper().writeValueAsBytes(queueContext)
       );
-
-      log.info("Published to {}: {}", getRetryQueue(), message);
+      log.info("Published to {}: {}", getRetryQueue(), queueContext);
     }
 
-    private void ensureExchange(String exchange) throws IOException {
+    @SneakyThrows
+    private void ensureExchange(String exchange) {
         connection.channel().exchangeDeclare(
                 exchange,
                 "direct",
@@ -288,6 +253,17 @@ public abstract class Trouper<Message extends QueueContext> {
                         .build());
     }
 
+    @SneakyThrows
+    private void addHandler(int consumerNumber, boolean sideline) {
+        val consumeChannel = connection.newChannel();
+        val handler = new Handler(consumeChannel,
+                clazz, prefetchCount, this, sideline);
+        val tag = consumeChannel.basicConsume(sideline ? getSidelineQueue() : queueName, false, handler);
+        handler.setTag(tag);
+        handlers.add(handler);
+        log.info("Started  consumer {} with queueName {}", consumerNumber, queueName);
+    }
+
     /**
      * Creates the required exchanges and queues.
      *
@@ -296,46 +272,21 @@ public abstract class Trouper<Message extends QueueContext> {
      *
      * Binds the consumers on both main and sideline queues depending on the appropriate configuration
      * settings defined.
-     *
-     * @throws Exception
      */
-    public void start() throws Exception {
-        String exchange = this.config.getNamespace();
-        String dlExchange = getRetryExchange();
-
+    public void start() {
+        val exchange = this.config.getNamespace();
+        val dlExchange = getRetryExchange();
         ensureExchange(exchange);
         ensureExchange(dlExchange);
-
         this.publishChannel = connection.newChannel();
-
         connection.ensure(queueName, this.config.getNamespace(), connection.rmqOpts());
         connection.ensure(getRetryQueue(), dlExchange, connection.rmqOpts(exchange, queueName));
         connection.ensure(getSidelineQueue(), this.config.getNamespace(), connection.rmqOpts());
-
-
         if (config.isConsumerEnabled()) {
-            for (int i = 1; i <= config.getConcurrency(); i++) {
-                Channel consumeChannel = connection.newChannel();
-                final Handler handler = new Handler(consumeChannel,
-                        clazz, prefetchCount, this, false);
-                final String tag = consumeChannel.basicConsume(queueName, false, handler);
-                handler.setTag(tag);
-                handlers.add(handler);
-                log.info("Started consumer {} of type {}", i, queueName);
-            }
-
-            SidelineConfiguration sidelineConfiguration = config.getSideline();
-
+            IntStream.rangeClosed(1, config.getConcurrency()).forEach(i -> addHandler(i, false));
+            val sidelineConfiguration = config.getSideline();
             if (sidelineConfiguration.isEnabled()) {
-                for (int i = 1; i <= sidelineConfiguration.getConcurrency(); i++) {
-                    Channel consumeChannel = connection.newChannel();
-                    final Handler handler = new Handler(consumeChannel,
-                            clazz, prefetchCount, this, true);
-                    final String tag = consumeChannel.basicConsume(getSidelineQueue(), false, handler);
-                    handler.setTag(tag);
-                    handlers.add(handler);
-                    log.info("Started sideline consumer {} of type {}", i, getSidelineQueue());
-                }
+                IntStream.rangeClosed(1, sidelineConfiguration.getConcurrency()).forEach(i -> addHandler(i, true));
             }
         }
     }
@@ -348,7 +299,7 @@ public abstract class Trouper<Message extends QueueContext> {
         }
         handlers.forEach(handler -> {
             try {
-                final Channel channel = handler.getChannel();
+                val channel = handler.getChannel();
                 channel.basicCancel(handler.getTag());
                 channel.close();
             } catch (Exception e) {
@@ -359,8 +310,8 @@ public abstract class Trouper<Message extends QueueContext> {
 
     private class Handler extends DefaultConsumer {
 
-        private final Class<? extends Message> clazz;
-        private final Trouper<Message> trouper;
+        private final Class<? extends C> clazz;
+        private final Trouper<C> trouper;
         private final boolean sideline;
 
         @Getter
@@ -368,10 +319,10 @@ public abstract class Trouper<Message extends QueueContext> {
         private String tag;
 
         private Handler(Channel channel,
-                        Class<? extends Message> clazz,
+                        Class<? extends C> clazz,
                         int prefetchCount,
-                        Trouper<Message> trouper,
-                        boolean sideline) throws Exception {
+                        Trouper<C> trouper,
+                        boolean sideline) throws IOException {
             super(channel);
 
             this.clazz = clazz;
@@ -394,7 +345,7 @@ public abstract class Trouper<Message extends QueueContext> {
          */
         private AMQP.BasicProperties getProperties(AMQP.BasicProperties basicProperties){
             if(null == basicProperties){
-                return new AMQP.BasicProperties.Builder().contentType("text/plain").deliveryMode(2).headers(new HashMap<>()).build();
+                return new AMQP.BasicProperties.Builder().contentType(CONTENT_TYPE).deliveryMode(2).headers(new HashMap<>()).build();
             }
 
             if(null == basicProperties.getHeaders()){
@@ -417,19 +368,17 @@ public abstract class Trouper<Message extends QueueContext> {
          * @param envelope          {@link Envelope}            RabbitMQ Envelope object
          * @param properties        {@link AMQP.BasicProperties}AMQP BasicProperties associated with the message
          * @param body              {@link Byte[]}              ByteArray representing the message
-         * @throws IOException
          */
         @Override
+        @SneakyThrows
         public void handleDelivery(String consumerTag, Envelope envelope,
-                                   AMQP.BasicProperties properties, byte[] body) throws IOException {
+                                   AMQP.BasicProperties properties, byte[] body) {
             try {
-                final Message message = SerDe.mapper().readValue(body, clazz);
-
-                AMQP.BasicProperties propertyDetails = getProperties(properties);
-
-                final boolean success = sideline ?
-                        trouper.processSideline(message, getAccessInformation(propertyDetails)) :
-                        trouper.handle(message, propertyDetails);
+                val queueContext = SerDe.mapper().readValue(body, clazz);
+                val propertyDetails = getProperties(properties);
+                val success = sideline ?
+                        trouper.processSideline(queueContext, getAccessInformation(propertyDetails)) :
+                        trouper.handle(queueContext, propertyDetails);
 
                 if (success) {
                     getChannel().basicAck(envelope.getDeliveryTag(), false);

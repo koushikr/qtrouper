@@ -19,6 +19,8 @@ import com.codahale.metrics.health.HealthCheck;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import io.github.qtrouper.core.rabbit.RabbitConnection;
+import lombok.AllArgsConstructor;
+import lombok.val;
 
 import javax.inject.Singleton;
 import java.io.IOException;
@@ -27,20 +29,17 @@ import java.io.IOException;
  * @author koushik
  */
 @Singleton
+@AllArgsConstructor
 public class TrouperHealthCheck extends HealthCheck{
     private final RabbitConnection rabbitConnection;
 
-    public TrouperHealthCheck(RabbitConnection rabbitConnection) {
-        this.rabbitConnection = rabbitConnection;
-    }
-
     @Override
     protected Result check() throws Exception {
-        final Connection connection = rabbitConnection.getConnection();
+        val connection = rabbitConnection.getConnection();
         Result result;
         if (connection != null && connection.isOpen()) {
             try {
-                Channel channel = connection.createChannel();
+                val channel = connection.createChannel();
                 channel.close();
                 result = Result.healthy();
             } catch (IOException e) {

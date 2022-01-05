@@ -20,15 +20,12 @@ import lombok.*;
 /**
  * @author koushik
  */
-@Getter
-@Setter
+@Data
+@EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class QAccessInfo {
-
     private boolean idempotencyCheckRequired;
-
     private int retryCount;
-
 }

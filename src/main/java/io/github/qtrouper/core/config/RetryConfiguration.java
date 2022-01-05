@@ -29,14 +29,9 @@ import lombok.*;
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RetryConfiguration {
-
     @Builder.Default
     private boolean enabled = true;
-
     private long ttlMs;
-
     private int maxRetries;
-
     private int backOffFactor; //multiplicationFactor
-
 }

@@ -17,6 +17,7 @@ package io.github.qtrouper.core.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Strings;
+import io.github.qtrouper.core.exceptions.TrouperExceptions;
 import io.github.qtrouper.utils.SerDe;
 import lombok.*;
 
@@ -32,16 +33,12 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@Builder
+@SuppressWarnings("unused")
 public class QueueContext implements Serializable{
-
     private String serviceReference;
-
+    @Builder.Default
     private Map<String, Object> data = new HashMap<>();
-
-    @Builder
-    public QueueContext(String serviceReference) {
-        this.serviceReference = serviceReference;
-    }
 
     public <T> void addContext(Class<T> klass, T value) {
         addContext(klass.getSimpleName().toUpperCase(), value);
@@ -53,17 +50,14 @@ public class QueueContext implements Serializable{
     }
 
     public <T> void addContext(String key, T value) {
-        if (this.data == null) this.data = new HashMap<>();
-
         if (Strings.isNullOrEmpty(key.toUpperCase()))
-            throw new RuntimeException("Invalid key for context data. Key cannot be null/empty");
-
+            TrouperExceptions.illegalArgument("Invalid key for context data. Key cannot be null/empty");
         this.data.put(key.toUpperCase(), value);
     }
 
     @JsonIgnore
     public <T> T getContext(String key, Class<T> tClass) {
-        Object value = this.data.get(key.toUpperCase());
+        val value = this.data.get(key.toUpperCase());
         return null == value ? null : SerDe.mapper().convertValue(value, tClass);
     }
 }
