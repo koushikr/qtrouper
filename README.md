@@ -18,7 +18,7 @@ Use the following maven dependency:
 <dependency>
     <groupId>io.github.qtrouper</groupId>
     <artifactId>qtrouper</artifactId>
-    <version>0.0.1-1</version>
+    <version>0.0.2</version>
 </dependency>
 ```
 
