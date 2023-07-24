@@ -52,7 +52,7 @@ public abstract class Trouper<C extends QueueContext> {
     private static final String EXPIRES_AT_TIMESTAMP = "x-expires-timestamp";
     private static final String EXPIRES_AT_ENABLED = "x-expires-enabled";
     private static final String CONTENT_TYPE = "text/plain";
-
+    private static final String PRIORITY = "x-max-priority";
     private final QueueConfiguration config;
     private final RabbitConnection connection;
     private final Class<? extends C> clazz;
@@ -279,7 +279,11 @@ public abstract class Trouper<C extends QueueContext> {
         ensureExchange(exchange);
         ensureExchange(dlExchange);
         this.publishChannel = connection.newChannel();
-        connection.ensure(queueName, this.config.getNamespace(), connection.rmqOpts());
+        Map<String, Object> arguments = new HashMap<>(connection.rmqOpts());
+        if (this.config.getPriority() != 0) {
+            arguments.put(PRIORITY, this.config.getPriority());
+        }
+        connection.ensure(queueName, this.config.getNamespace(), arguments);
         connection.ensure(getRetryQueue(), dlExchange, connection.rmqOpts(exchange, queueName));
         connection.ensure(getSidelineQueue(), this.config.getNamespace(), connection.rmqOpts());
         if (config.isConsumerEnabled()) {

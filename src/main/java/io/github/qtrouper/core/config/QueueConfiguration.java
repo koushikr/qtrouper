@@ -51,6 +51,10 @@ public class QueueConfiguration {
     private RetryConfiguration retry;
     @Valid
     private SidelineConfiguration sideline;
+    @Valid
+    @Min(0)
+    @Max(255)
+    private int priority;
 
     @JsonIgnore
     public boolean isConsumerEnabled(){
