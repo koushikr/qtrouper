@@ -44,7 +44,7 @@
         <junit.version>4.13.2</junit.version>
         <mockito.version>4.2.0</mockito.version>
         <cglib.version>3.2.5</cglib.version>
-        <amqp.version>5.14.0</amqp.version>
+        <amqp.version>5.34.0</amqp.version>
         <testcontainer.rabbitmq.version>1.16.2</testcontainer.rabbitmq.version>
         <reflections.version>0.10.2</reflections.version>
         <!--Jacoco properties-->
